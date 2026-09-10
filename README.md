@@ -1,7 +1,10 @@
 # Web App Materi Interaktif & Bank Soal Bahasa Arab Kelas 3 SDIT
 ### SDIT TAHFIDZ BINTANGKU KOTA PROBOLINGGO - TAHUN AJARAN 2026/2027
 **Fokus Keterampilan**: Maharatul Kitabah (Keterampilan Menulis) & Fahmul Maqru' (Pemahaman Teks Cerita)  
-**Tema**: Alat Tulis & Peralatan Sekolah (الأدوات المكتبية والمدرسية) & Benda di Dalam Kelas (في الفصل)
+**Tema**: Alat Tulis & Peralatan Sekolah (الأدوات المكتبية والمدرسية) & Benda di Dalam Kelas (في الفصل)  
+
+🌐 **Akses Web App Langsung (Live Demo)**:  
+👉 **[https://satsetx4.github.io/bahasa-arab-kelas3/](https://satsetx4.github.io/bahasa-arab-kelas3/)**
 
 ---
 
