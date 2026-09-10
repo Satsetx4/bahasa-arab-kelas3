@@ -679,6 +679,20 @@ button:disabled {
   color: #475569;
 }
 
+[data-theme="dark"] .text-slate-900 {
+  color: var(--ink);
+}
+
+/* Panel Arab kartu kosakata: gradient terang bawaan → kaca malam, biar teks tidak pudar */
+[data-theme="dark"] div[class*="from-slate-50"] {
+  background-image: linear-gradient(rgba(52, 211, 153, 0.16), rgba(52, 211, 153, 0.05));
+  border-color: rgba(52, 211, 153, 0.3);
+}
+
+[data-theme="dark"] button[class*="bg-white/80"] {
+  background-color: rgba(6, 20, 14, 0.72);
+}
+
 /* Gerak dikurangi: hormati pengguna */
 @media (prefers-reduced-motion: reduce) {
   html {

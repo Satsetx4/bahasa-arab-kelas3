@@ -33,7 +33,11 @@
       box.querySelectorAll('.rv:not(.in)').forEach(function (el) { el.classList.add('in'); });
       return;
     }
-    if (!('IntersectionObserver' in window)) return;
+    if (!('IntersectionObserver' in window)) {
+      // Tanpa observer: tampilkan langsung, jangan biarkan pudar selamanya.
+      box.querySelectorAll('.rv:not(.in)').forEach(function (el) { el.classList.add('in'); });
+      return;
+    }
     if (!io) {
       io = new IntersectionObserver(function (entries) {
         entries.forEach(function (en) {
@@ -68,10 +72,17 @@
 
   function enhanceCards(container) {
     if (!container) return;
+    var hidden = container.closest && container.closest('.tab-section.hidden');
     var kids = container.querySelectorAll(':scope > div:not(.trend-card)');
     kids.forEach(function (k, i) {
-      k.classList.add('trend-card', 'rv');
-      k.style.setProperty('--rd', (Math.min(i % 9, 8) * 60) + 'ms');
+      k.classList.add('trend-card');
+      if (hidden) {
+        // Tab belum dibuka: langsung tampil, jangan animasi (observer tak lihat tab hidden).
+        k.classList.add('rv', 'in');
+      } else {
+        k.classList.add('rv');
+        k.style.setProperty('--rd', (Math.min(i % 9, 8) * 60) + 'ms');
+      }
     });
     observeRv(container);
     attachTilt(container);
@@ -123,6 +134,14 @@
     deb = setTimeout(refreshIcons, 120);
   }
 
+  // Safety net: kartu di tab aktif TIDAK BOLEH nyangkut pudar. Dipanggil tiap tab dibuka.
+  function revealActiveTab() {
+    document.querySelectorAll('.tab-section:not(.hidden) .rv:not(.in)').forEach(function (el, i) {
+      el.style.setProperty('--rd', (Math.min(i % 9, 8) * 40) + 'ms');
+      requestAnimationFrame(function () { requestAnimationFrame(function () { el.classList.add('in'); }); });
+    });
+  }
+
   function watch() {
     var cardBoxes = ['vocab-list-container', 'quiz-questions-list', 'exam-questions-container'];
     var mo = new MutationObserver(function (muts) {
@@ -158,6 +177,18 @@
     watch();
     initStats();
     refreshIcons();
+    // Hook ke switchTab bawaan app: tiap tab dibuka, paksa kartu tampil.
+    if (window.switchTab) {
+      var origSwitch = window.switchTab;
+      window.switchTab = function (id) {
+        origSwitch(id);
+        setTimeout(revealActiveTab, 60);
+      };
+    }
+    document.querySelectorAll('[data-tab-target]').forEach(function (b) {
+      b.addEventListener('click', function () { setTimeout(revealActiveTab, 120); });
+    });
+    setTimeout(revealActiveTab, 400);
   });
 
   window.Trend = { observe: observeRv, refresh: refreshIcons };
