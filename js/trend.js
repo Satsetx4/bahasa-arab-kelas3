@@ -72,19 +72,15 @@
 
   function enhanceCards(container) {
     if (!container) return;
-    var hidden = container.closest && container.closest('.tab-section.hidden');
+    // Kartu konten TIDAK pakai animasi pudar (.rv) — soal & kosakata wajib
+    // langsung tampil penuh. Hanya efek angkat saat hover (CSS .trend-card).
     var kids = container.querySelectorAll(':scope > div:not(.trend-card)');
-    kids.forEach(function (k, i) {
+    kids.forEach(function (k) {
       k.classList.add('trend-card');
-      if (hidden) {
-        // Tab belum dibuka: langsung tampil, jangan animasi (observer tak lihat tab hidden).
-        k.classList.add('rv', 'in');
-      } else {
-        k.classList.add('rv');
-        k.style.setProperty('--rd', (Math.min(i % 9, 8) * 60) + 'ms');
-      }
+      k.classList.remove('rv');
+      k.classList.add('in');
+      k.style.removeProperty('--rd');
     });
-    observeRv(container);
     attachTilt(container);
   }
 
