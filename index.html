@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bahasa Arab Kelas 3 SDIT Tahfidz Bintangku - Materi Interaktif & Bank Soal</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Canvas Confetti for celebrations -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <!-- Google Fonts & Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+              900: '#064e3b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+
+  <!-- ================= TOP NOTIFICATION BAR ================= -->
+  <div class="no-print bg-emerald-700 text-white text-xs py-2 px-4 text-center font-medium flex items-center justify-center gap-2">
+    <span class="inline-block w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
+    <span>Aplikasi Resmi Materi Asesmen Tengah Semester Ganjil TA 2026/2027 • SDIT Tahfidz Bintangku Kota Probolinggo</span>
+  </div>
+
+  <!-- ================= HEADER UTAMA ================= -->
+  <header class="no-print bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        <!-- Logo & School Brand -->
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white text-2xl shadow-md shadow-emerald-500/20 shrink-0">
+            ⭐
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-base sm:text-lg text-slate-800 tracking-tight">SDIT TAHFIDZ BINTANGKU</span>
+              <span class="hidden sm:inline-block px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-extrabold rounded-md uppercase">Kelas 3</span>
+            </div>
+            <p class="text-xs text-slate-500 font-medium">Bahasa Arab: Alat Tulis & Benda di Kelas • Maharatul Kitabah</p>
+          </div>
+        </div>
+
+        <!-- Right Quick Actions -->
+        <div class="flex items-center gap-2">
+          <button 
+            onclick="switchTab('cetak')"
+            class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all">
+            <i data-lucide="printer" class="w-4 h-4 text-slate-500"></i>
+            <span>Cetak Soal (PDF)</span>
+          </button>
+          <button 
+            onclick="switchTab('asesmen')"
+            class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 transition-all">
+            <i data-lucide="award" class="w-4 h-4"></i>
+            <span>Mulai Ujian</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs Bar -->
+      <div class="flex space-x-1 sm:space-x-2 overflow-x-auto py-2 border-t border-slate-100 no-scrollbar" id="tab-buttons">
+        <button data-tab-target="materi" class="px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-emerald-700 bg-emerald-50 border border-emerald-600 shadow-sm font-semibold">
+          <i data-lucide="book-marked" class="w-4 h-4"></i>
+          <span>1. Materi & Kosakata</span>
+        </button>
+        <button data-tab-target="cerita" class="px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
+          <i data-lucide="file-text" class="w-4 h-4"></i>
+          <span>2. Teks Cerita (فِي فَصْلِيْ)</span>
+        </button>
+        <button data-tab-target="kitabah" class="px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
+          <i data-lucide="pen-tool" class="w-4 h-4"></i>
+          <span>3. Maharatul Kitabah (Papan Tulis)</span>
+        </button>
+        <button data-tab-target="kuis" class="px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
+          <i data-lucide="help-circle" class="w-4 h-4"></i>
+          <span>4. Bank Soal Interaktif (35 Soal)</span>
+        </button>
+        <button data-tab-target="asesmen" class="px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
+          <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+          <span>5. Simulasi Asesmen ATS</span>
+        </button>
+        <button data-tab-target="cetak" class="px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>6. Cetak Lembar Kerja</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ================= KONTEN UTAMA ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+    <!-- ======================================================== -->
+    <!-- TAB 1: MATERI & KOSAKATA LENGKAP -->
+    <!-- ======================================================== -->
+    <section id="tab-materi" class="tab-section">
+      <!-- Banner Pengantar -->
+      <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white p-6 sm:p-8 rounded-3xl shadow-lg mb-8 relative overflow-hidden">
+        <div class="relative z-10 max-w-2xl">
+          <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold mb-3">
+            📚 Kurikulum Bahasa Arab SDIT Kelas 3
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold mb-2 tracking-tight">
+            Materi Kosakata Alat Tulis & Benda di Kelas
+          </h2>
+          <p class="text-emerald-100 text-sm leading-relaxed mb-4">
+            Pelajari 22 kosakata lengkap dengan tulisan Arab berharakat, cara baca (latin), arti bahasa Indonesia, dan audio pelafalan asli.
+          </p>
+          <div class="flex flex-wrap gap-2 text-xs">
+            <span class="bg-white/25 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5">
+              <span>✏️</span> 7 Alat Tulis & Sekolah
+            </span>
+            <span class="bg-white/25 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5">
+              <span>🏫</span> 15 Benda di Dalam Kelas
+            </span>
+            <span class="bg-amber-300 text-amber-950 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shadow-sm">
+              <span>🔊</span> Dilengkapi Suara Audio
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls: Filter & Switch Mode (Grid / Flashcard) -->
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <!-- Search bar -->
+        <div class="relative flex-1">
+          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+          <input 
+            type="text" 
+            id="vocab-search" 
+            placeholder="Cari kosakata Arab, latin, atau arti..." 
+            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all">
+        </div>
+
+        <!-- Filter Kategori Buttons -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+          <button data-vocab-filter="all" class="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow transition-all">
+            Semua (22)
+          </button>
+          <button data-vocab-filter="alat_tulis" class="px-3 py-2 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all whitespace-nowrap">
+            ✏️ Alat Tulis (7)
+          </button>
+          <button data-vocab-filter="benda_kelas" class="px-3 py-2 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all whitespace-nowrap">
+            🏫 Benda Kelas (15)
+          </button>
+        </div>
+
+        <!-- Mode Tampilan Switcher -->
+        <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl shrink-0">
+          <button id="btn-mode-grid" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white shadow-xs transition-all flex items-center gap-1.5">
+            <i data-lucide="grid" class="w-3.5 h-3.5"></i>
+            <span>Daftar</span>
+          </button>
+          <button id="btn-mode-flashcard" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:text-slate-900 transition-all flex items-center gap-1.5">
+            <i data-lucide="layers" class="w-3.5 h-3.5"></i>
+            <span>Flashcard</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- VIEW 1: GRID KOSAKATA -->
+      <div id="vocab-grid-view">
+        <div id="vocab-list-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- Di-render dinamis oleh app.js -->
+        </div>
+      </div>
+
+      <!-- VIEW 2: FLASHCARD INTERAKTIF -->
+      <div id="vocab-flashcard-view" class="hidden max-w-xl mx-auto py-4">
+        <!-- Progress bar -->
+        <div class="mb-4">
+          <div class="flex items-center justify-between text-xs text-slate-500 font-bold mb-1">
+            <span>Kartu Belajar</span>
+            <span id="fc-counter">1 / 22</span>
+          </div>
+          <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+            <div id="fc-progress-bar" class="bg-emerald-600 h-full transition-all duration-300" style="width: 5%"></div>
+          </div>
+        </div>
+
+        <!-- 3D Flippable Card -->
+        <div class="perspective-1000 w-full h-[380px] cursor-pointer" id="flashcard-element">
+          <div id="flashcard-inner" class="flip-card-inner relative w-full h-full rounded-3xl shadow-xl border border-slate-200">
+            <!-- Front Card -->
+            <div class="flip-card-front absolute inset-0 bg-white rounded-3xl p-8 flex flex-col justify-between items-center text-center">
+              <div class="w-full flex items-center justify-between">
+                <span id="fc-front-category" class="px-3 py-1 bg-emerald-50 text-emerald-800 text-xs font-bold rounded-full border border-emerald-200">
+                  Alat Tulis
+                </span>
+                <button id="fc-sound-btn" class="p-2.5 rounded-full bg-emerald-100 hover:bg-emerald-200 text-emerald-800 transition-colors" title="Dengarkan Suara">
+                  <i data-lucide="volume-2" class="w-5 h-5"></i>
+                </button>
+              </div>
+
+              <div class="my-auto space-y-4">
+                <div id="fc-front-emoji" class="text-6xl animate-bounce">📓</div>
+                <div id="fc-front-arabic" class="font-arabic text-5xl text-slate-900 font-bold leading-relaxed" dir="rtl">
+                  دَفْتَرٌ
+                </div>
+                <div id="fc-front-latin" class="text-base font-bold text-emerald-700 tracking-wider">
+                  Daftarun
+                </div>
+              </div>
+
+              <div class="text-xs text-slate-400 font-medium flex items-center gap-1">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Klik kartu untuk membalik & melihat arti</span>
+              </div>
+            </div>
+
+            <!-- Back Card -->
+            <div class="flip-card-back absolute inset-0 bg-gradient-to-br from-emerald-700 to-teal-800 text-white rounded-3xl p-8 flex flex-col justify-between items-center text-center shadow-xl">
+              <div class="w-full flex items-center justify-between text-emerald-200 text-xs font-semibold">
+                <span>Arti & Contoh</span>
+                <span class="bg-white/20 px-2 py-0.5 rounded-md">Bahasa Arab 3 SDIT</span>
+              </div>
+
+              <div class="my-auto space-y-4">
+                <div class="text-xs uppercase tracking-widest text-emerald-200 font-bold">Arti Kosakata:</div>
+                <div id="fc-back-meaning" class="text-3xl font-extrabold text-white">
+                  Buku Tulis
+                </div>
+                <div id="fc-back-arabic" class="font-arabic text-2xl text-emerald-100" dir="rtl">
+                  دَفْتَرٌ
+                </div>
+                
+                <!-- Contoh Penggunaan -->
+                <div class="bg-white/10 backdrop-blur-md p-3.5 rounded-2xl border border-white/20 text-xs max-w-sm">
+                  <div class="text-[11px] text-emerald-200 font-semibold mb-1">Contoh dalam Kalimat:</div>
+                  <div id="fc-back-example" class="font-arabic text-lg font-bold" dir="rtl">فِي حَقِيبَتِي دَفْتَرٌ</div>
+                  <div id="fc-back-trans" class="text-[11px] text-emerald-100 italic mt-0.5">Di dalam tas saya ada buku tulis.</div>
+                </div>
+              </div>
+
+              <div class="text-xs text-emerald-200 font-medium flex items-center gap-1">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                <span>Klik untuk membalik kembali</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Flashcard Navigation Buttons -->
+        <div class="flex items-center justify-center gap-4 mt-6">
+          <button id="fc-prev-btn" class="px-5 py-3 rounded-2xl bg-white border border-slate-200 shadow-sm text-slate-700 hover:bg-slate-50 font-bold text-xs flex items-center gap-2 transition-all">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+            <span>Sebelumnya</span>
+          </button>
+          <button id="fc-flip-btn" class="px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md text-xs font-bold flex items-center gap-2 transition-all">
+            <i data-lucide="repeat" class="w-4 h-4"></i>
+            <span>Balik Kartu</span>
+          </button>
+          <button id="fc-next-btn" class="px-5 py-3 rounded-2xl bg-white border border-slate-200 shadow-sm text-slate-700 hover:bg-slate-50 font-bold text-xs flex items-center gap-2 transition-all">
+            <span>Selanjutnya</span>
+            <i data-lucide="arrow-right" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- TAB 2: TEKS BACAAN CERITA INTERAKTIF ("فِي فَصْلِيْ") -->
+    <!-- ======================================================== -->
+    <section id="tab-cerita" class="tab-section hidden">
+      <div id="story-interactive-container">
+        <!-- Di-render dinamis oleh app.js -->
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- TAB 3: MAHARATUL KITABAH (PAPAN TULIS & PUZZLE SAMBUNG) -->
+    <!-- ======================================================== -->
+    <section id="tab-kitabah" class="tab-section hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        <!-- Kolom Kiri & Tengah: Papan Tulis Canvas Tracing -->
+        <div class="lg:col-span-2 space-y-4">
+          <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm">
+            
+            <!-- Toolbar Papan Tulis -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                <h3 class="font-bold text-slate-800 text-sm">Papan Tulis Maharatul Kitabah (Khat Naskh)</h3>
+              </div>
+
+              <!-- Pilihan Kosakata untuk Ditiru (Tracing) -->
+              <div class="flex items-center gap-2">
+                <label class="text-xs text-slate-500 font-semibold">Tiru Kata:</label>
+                <select id="tracing-word-select" class="px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                  <!-- Populated by JS -->
+                </select>
+              </div>
+            </div>
+
+            <!-- Canvas Drawing Area -->
+            <div class="w-full rounded-2xl overflow-hidden border-2 border-slate-200 shadow-inner canvas-grid relative">
+              <canvas id="kitabah-canvas" class="w-full block touch-none cursor-crosshair"></canvas>
+            </div>
+
+            <!-- Drawing Controls Bottom Bar -->
+            <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+              <!-- Colors -->
+              <div class="flex items-center gap-1.5">
+                <span class="text-slate-400 font-medium mr-1">Tinta:</span>
+                <button data-draw-color="#1e293b" class="w-7 h-7 rounded-full bg-slate-800 ring-4 ring-emerald-300 transition-all" title="Hitam"></button>
+                <button data-draw-color="#059669" class="w-7 h-7 rounded-full bg-emerald-600 transition-all" title="Hijau"></button>
+                <button data-draw-color="#2563eb" class="w-7 h-7 rounded-full bg-blue-600 transition-all" title="Biru"></button>
+                <button data-draw-color="#dc2626" class="w-7 h-7 rounded-full bg-red-600 transition-all" title="Merah"></button>
+              </div>
+
+              <!-- Stroke Thickness -->
+              <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+                <span class="text-slate-400 text-[10px] px-1 font-semibold">Tebal:</span>
+                <button data-draw-size="4" class="px-2 py-1 rounded-lg font-bold text-slate-700">Tipis</button>
+                <button data-draw-size="7" class="px-2 py-1 rounded-lg font-bold bg-emerald-600 text-white">Sedang</button>
+                <button data-draw-size="12" class="px-2 py-1 rounded-lg font-bold text-slate-700">Tebal</button>
+              </div>
+
+              <!-- Actions (Undo, Eraser, Clear, Save) -->
+              <div class="flex items-center gap-1.5">
+                <button id="canvas-undo-btn" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all" title="Urungkan (Undo)">
+                  <i data-lucide="undo-2" class="w-4 h-4"></i>
+                </button>
+                <button id="canvas-eraser-btn" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all" title="Mode Penghapus">
+                  <i data-lucide="eraser" class="w-4 h-4"></i>
+                </button>
+                <button id="canvas-guide-btn" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all" title="On/Off Bayangan Tulisan">
+                  <i data-lucide="eye" class="w-4 h-4"></i>
+                </button>
+                <button id="canvas-clear-btn" class="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 font-bold rounded-xl transition-all flex items-center gap-1">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  <span>Bersihkan</span>
+                </button>
+                <button id="canvas-download-btn" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all flex items-center gap-1">
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                  <span>Simpan Hasil</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Petunjuk Menulis Arab untuk Siswa Kelas 3 -->
+            <div class="mt-4 p-3.5 bg-emerald-50 rounded-2xl border border-emerald-200 text-xs text-emerald-900 flex items-start gap-2.5">
+              <span class="text-base">✍️</span>
+              <div>
+                <strong>Kaidah Menulis Huruf Arab:</strong>
+                <ul class="list-disc list-inside mt-0.5 space-y-0.5 text-emerald-800">
+                  <li>Menulis Arab selalu dimulai dari <strong>kanan ke kiri</strong>.</li>
+                  <li>Huruf seperti <strong>د, ذ, ر, ز, و, ا</strong> tidak bisa disambung dengan huruf setelahnya.</li>
+                  <li>Gunakan garis putus-putus abu-abu sebagai batas atas huruf dan garis solid sebagai dasar tulisan (baseline).</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kolom Kanan: Game Puzzle Sambung Huruf Interaktif -->
+        <div class="space-y-4">
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+              <div>
+                <h3 class="font-bold text-slate-800 text-sm">🧩 Puzzle Sambung Huruf</h3>
+                <p class="text-[11px] text-slate-400">Latihan menyambung huruf hijaiyah terpisah</p>
+              </div>
+              <span id="puzzle-counter" class="text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg">
+                Soal 1
+              </span>
+            </div>
+
+            <div id="sambung-puzzle-content">
+              <!-- Di-render dinamis oleh app.js -->
+            </div>
+
+            <div class="flex items-center justify-between gap-2 mt-6 pt-4 border-t border-slate-100">
+              <button id="puzzle-prev-btn" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all">
+                ← Soal Sebelumnya
+              </button>
+              <button id="puzzle-next-btn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all">
+                Soal Berikutnya →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- TAB 4: BANK SOAL INTERAKTIF (35 SOAL LENGKAP) -->
+    <!-- ======================================================== -->
+    <section id="tab-kuis" class="tab-section hidden">
+      <!-- Header Kuis & Filter -->
+      <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-extrabold text-slate-800">Bank Soal & Latihan Interaktif</h2>
+          <p class="text-xs text-slate-500 mt-1">Latihan soal dengan koreksi otomatis, kunci jawaban, dan pembahasan langsung.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <button data-quiz-filter="all" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow transition-all">
+            Semua Soal
+          </button>
+          <button data-quiz-filter="teks_cerita" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all">
+            📖 Soal Cerita
+          </button>
+          <button data-quiz-filter="sambung_huruf" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all">
+            ✍️ Sambung Huruf
+          </button>
+          <button data-quiz-filter="ikmal_huruf" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all">
+            🔤 Lengkapi Huruf
+          </button>
+          <button data-quiz-filter="pilihan_ganda" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all">
+            🎯 Pilihan Ganda
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Score Floating Card -->
+      <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl mb-6 flex items-center justify-between text-xs font-bold text-emerald-900">
+        <div class="flex items-center gap-2">
+          <span>📊 Status Pengerjaan:</span>
+          <span id="quiz-live-score" class="bg-white px-3 py-1 rounded-lg border border-emerald-300 shadow-xs">Benar: 0 / 0</span>
+        </div>
+        <span id="quiz-total-count" class="text-slate-500 font-medium">35 Butir Soal</span>
+      </div>
+
+      <!-- Container Daftar Soal -->
+      <div id="quiz-questions-list" class="space-y-6">
+        <!-- Di-render dinamis oleh app.js -->
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- TAB 5: SIMULASI ASESMEN TENGAH SEMESTER (TIMED EXAM) -->
+    <!-- ======================================================== -->
+    <section id="tab-asesmen" class="tab-section hidden">
+      <!-- Intro Box -->
+      <div id="exam-intro-box" class="max-w-2xl mx-auto bg-white p-8 rounded-3xl border border-slate-200 shadow-lg text-center space-y-6">
+        <div class="w-20 h-20 bg-emerald-100 text-emerald-700 rounded-3xl flex items-center justify-center text-4xl mx-auto shadow-inner">
+          📝
+        </div>
+        <div>
+          <span class="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-extrabold rounded-full uppercase tracking-wider">
+            Simulasi Ujian Resmi
+          </span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 mt-2">
+            Asesmen Tengah Semester Ganjil TA 2026/2027
+          </h2>
+          <p class="text-slate-500 text-sm mt-2 max-w-md mx-auto">
+            Simulasi pengerjaan ujian Bahasa Arab Kelas 3 SDIT Tahfidz Bintangku Kota Probolinggo.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs">
+          <div>
+            <div class="text-slate-400">Jumlah Soal</div>
+            <div class="font-extrabold text-slate-800 text-base mt-0.5">15 Butir</div>
+          </div>
+          <div class="border-x border-slate-200">
+            <div class="text-slate-400">Waktu Ujian</div>
+            <div class="font-extrabold text-slate-800 text-base mt-0.5">30 Menit</div>
+          </div>
+          <div>
+            <div class="text-slate-400">Fokus Materi</div>
+            <div class="font-extrabold text-slate-800 text-base mt-0.5">Teks Cerita & Tulis</div>
+          </div>
+        </div>
+
+        <button 
+          id="start-exam-btn"
+          class="w-full sm:w-auto px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-emerald-600/25 transition-all">
+          🚀 Mulai Kerjakan Asesmen Sekarang
+        </button>
+      </div>
+
+      <!-- Active Exam Box (Saat Ujian Berlangsung) -->
+      <div id="exam-active-box" class="hidden space-y-6">
+        <!-- Floating Exam Header with Timer -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-md sticky top-24 z-30 flex items-center justify-between">
+          <div>
+            <span class="text-xs font-bold text-slate-700">Simulasi ATS Bahasa Arab</span>
+            <div id="exam-progress-text" class="text-xs text-slate-400">Terjawab: 0 / 15</div>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 bg-red-50 border border-red-200 px-3 py-1.5 rounded-xl text-red-700 font-mono font-bold text-sm">
+              <i data-lucide="clock" class="w-4 h-4 text-red-600 animate-pulse"></i>
+              <span id="exam-timer-display">30:00</span>
+            </div>
+            <button 
+              id="submit-exam-btn"
+              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow transition-all">
+              Kumpulkan Ujian
+            </button>
+          </div>
+        </div>
+
+        <div id="exam-questions-container" class="space-y-6">
+          <!-- Di-render dinamis oleh app.js -->
+        </div>
+
+        <div class="text-center pt-6">
+          <button 
+            onclick="document.getElementById('submit-exam-btn').click()"
+            class="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm rounded-2xl shadow-lg transition-all">
+            ✓ Selesai & Kumpulkan Jawaban
+          </button>
+        </div>
+      </div>
+
+      <!-- Exam Result Box (Setelah Dikumpulkan) -->
+      <div id="exam-result-box" class="hidden max-w-3xl mx-auto space-y-6">
+        <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-lg text-center space-y-4">
+          <div class="text-5xl">🏆</div>
+          <h3 class="text-2xl font-extrabold text-slate-800">Hasil Asesmen Tengah Semester</h3>
+          
+          <!-- Score Circle -->
+          <div class="py-4">
+            <div class="inline-flex items-baseline justify-center gap-1">
+              <span id="exam-score-number" class="text-6xl font-black text-emerald-600">95</span>
+              <span class="text-2xl font-bold text-slate-400">/ 100</span>
+            </div>
+            <div id="exam-correct-count" class="text-xs font-bold text-slate-500 mt-1">14 dari 15 Soal Benar</div>
+          </div>
+
+          <div id="exam-predikat-badge" class="inline-block px-4 py-1.5 rounded-full text-sm font-bold text-emerald-700 bg-emerald-100">
+            MUMTAZ (Istimewa / Sangat Baik)
+          </div>
+
+          <div class="pt-4 flex justify-center gap-3">
+            <button 
+              onclick="startExamSimulation()" 
+              class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition-all flex items-center gap-2">
+              <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+              <span>Ulangi Ujian</span>
+            </button>
+            <button 
+              onclick="switchTab('cetak')" 
+              class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+              <i data-lucide="printer" class="w-4 h-4"></i>
+              <span>Cetak Lembar Asesmen</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Pembahasan Review Ujian -->
+        <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+          <h4 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+            <i data-lucide="check-square" class="w-4 h-4 text-emerald-600"></i>
+            <span>Review Pembahasan Setiap Soal:</span>
+          </h4>
+          <div id="exam-review-container" class="space-y-3">
+            <!-- Di-render dinamis -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- TAB 6: CETAK LEMBAR KERJA ASESMEN (PRINT PDF) -->
+    <!-- ======================================================== -->
+    <section id="tab-cetak" class="tab-section hidden">
+      <!-- Toolbar Cetak -->
+      <div class="no-print bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-extrabold text-slate-800">Cetak Lembar Asesmen Siswa (A4 / PDF)</h2>
+          <p class="text-xs text-slate-500 mt-1">
+            Lembar asesmen resmi lengkap dengan Kop SDIT Tahfidz Bintangku Kota Probolinggo, kolom nilai, dan rubrik penilaian guru.
+          </p>
+        </div>
+
+        <button 
+          id="btn-print-action"
+          class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl shadow-md flex items-center justify-center gap-2 transition-all">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>Cetak Sekarang (Ctrl + P)</span>
+        </button>
+      </div>
+
+      <!-- Area Lembar Asesmen Cetak -->
+      <div id="print-area" class="border border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+        <!-- Di-render dinamis oleh app.js -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= POPUP MODAL ARTI KATA ================= -->
+  <div id="word-detail-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 text-center space-y-4 animate-in fade-in duration-200">
+      <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl mx-auto">
+        📖
+      </div>
+      <div>
+        <div id="modal-word-arabic" class="font-arabic text-4xl text-slate-800 font-bold leading-relaxed mb-1" dir="rtl">
+          مَكْتَبٌ
+        </div>
+        <div id="modal-word-trans" class="text-base font-extrabold text-emerald-700">
+          Meja
+        </div>
+        <div id="modal-word-type" class="text-xs text-slate-500 mt-2 bg-slate-50 p-2 rounded-xl border border-slate-100">
+          🏫 Benda di Dalam Kelas
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 pt-2">
+        <button 
+          onclick="playArabicSpeech(document.getElementById('modal-word-arabic').textContent)"
+          class="flex-1 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs rounded-xl transition-colors flex items-center justify-center gap-1.5">
+          <i data-lucide="volume-2" class="w-4 h-4"></i>
+          <span>Dengarkan</span>
+        </button>
+        <button 
+          onclick="closeWordModal()"
+          class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl transition-colors">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="no-print bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 space-y-2">
+      <p class="font-semibold text-slate-700">
+        SDIT TAHFIDZ BINTANGKU KOTA PROBOLINGGO • TAHUN AJARAN 2026/2027
+      </p>
+      <p>
+        Bahan Pembelajaran & Bank Soal Asesmen Tengah Semester Ganjil - Bahasa Arab Kelas 3 (Maharatul Kitabah)
+      </p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/canvas.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
