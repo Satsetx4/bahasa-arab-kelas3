@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#07120d">
   <title>Bahasa Arab Kelas 3 SDIT Tahfidz Bintangku - Materi Interaktif & Bank Soal</title>
   
   <!-- Tailwind CSS CDN -->
@@ -38,15 +39,17 @@
   </script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+  <div class="bg-orbs" aria-hidden="true"></div>
+  <div class="bg-grain" aria-hidden="true"></div>
 
   <!-- ================= TOP NOTIFICATION BAR ================= -->
-  <div class="no-print bg-emerald-700 text-white text-xs py-2 px-4 text-center font-medium flex items-center justify-center gap-2">
+  <div class="no-print app-topbar bg-emerald-700 text-white text-xs py-2 px-4 text-center font-medium flex items-center justify-center gap-2">
     <span class="inline-block w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
     <span>Aplikasi Resmi Materi Asesmen Tengah Semester Ganjil TA 2026/2027 • SDIT Tahfidz Bintangku Kota Probolinggo</span>
   </div>
 
   <!-- ================= HEADER UTAMA ================= -->
-  <header class="no-print bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
+  <header class="no-print app-header bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-20">
         <!-- Logo & School Brand -->
@@ -65,6 +68,10 @@
 
         <!-- Right Quick Actions -->
         <div class="flex items-center gap-2">
+          <button id="theme-toggle-btn" class="theme-btn" title="Ganti mode malam / siang" aria-label="Ganti mode malam atau siang" type="button">
+            <i data-lucide="moon" class="w-4 h-4 icon-moon"></i>
+            <i data-lucide="sun" class="w-4 h-4 icon-sun"></i>
+          </button>
           <button 
             onclick="switchTab('cetak')"
             class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all">
@@ -82,27 +89,27 @@
 
       <!-- Navigation Tabs Bar -->
       <div class="flex space-x-1 sm:space-x-2 overflow-x-auto py-2 border-t border-slate-100 no-scrollbar" id="tab-buttons">
-        <button data-tab-target="materi" class="px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-emerald-700 bg-emerald-50 border border-emerald-600 shadow-sm font-semibold">
+        <button data-tab-target="materi" class="trend-tab px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-emerald-700 bg-emerald-50 border border-emerald-600 shadow-sm font-semibold">
           <i data-lucide="book-marked" class="w-4 h-4"></i>
           <span>1. Materi & Kosakata</span>
         </button>
-        <button data-tab-target="cerita" class="px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
+        <button data-tab-target="cerita" class="trend-tab px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
           <i data-lucide="file-text" class="w-4 h-4"></i>
           <span>2. Teks Cerita (فِي فَصْلِيْ)</span>
         </button>
-        <button data-tab-target="kitabah" class="px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
+        <button data-tab-target="kitabah" class="trend-tab px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
           <i data-lucide="pen-tool" class="w-4 h-4"></i>
           <span>3. Maharatul Kitabah (Papan Tulis)</span>
         </button>
-        <button data-tab-target="kuis" class="px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
+        <button data-tab-target="kuis" class="trend-tab px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
           <i data-lucide="help-circle" class="w-4 h-4"></i>
           <span>4. Bank Soal Interaktif (35 Soal)</span>
         </button>
-        <button data-tab-target="asesmen" class="px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
+        <button data-tab-target="asesmen" class="trend-tab px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
           <i data-lucide="check-circle-2" class="w-4 h-4"></i>
           <span>5. Simulasi Asesmen ATS</span>
         </button>
-        <button data-tab-target="cetak" class="px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
+        <button data-tab-target="cetak" class="trend-tab px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
           <i data-lucide="printer" class="w-4 h-4"></i>
           <span>6. Cetak Lembar Kerja</span>
         </button>
@@ -118,7 +125,10 @@
     <!-- ======================================================== -->
     <section id="tab-materi" class="tab-section">
       <!-- Banner Pengantar -->
-      <div class="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white p-6 sm:p-8 rounded-3xl shadow-lg mb-8 relative overflow-hidden">
+      <div class="hero-mesh bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white p-6 sm:p-8 rounded-3xl shadow-lg mb-8 relative overflow-hidden">
+        <span class="float-ar text-6xl" style="top: 8px; right: 6%;" aria-hidden="true">ع</span>
+        <span class="float-ar text-4xl" style="bottom: 12px; right: 22%; animation-delay: -2s;" aria-hidden="true">ب</span>
+        <span class="float-ar text-5xl" style="top: 18px; right: 42%; animation-delay: -4s;" aria-hidden="true">ت</span>
         <div class="relative z-10 max-w-2xl">
           <span class="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold mb-3">
             📚 Kurikulum Bahasa Arab SDIT Kelas 3
@@ -129,7 +139,21 @@
           <p class="text-emerald-100 text-sm leading-relaxed mb-4">
             Pelajari 22 kosakata lengkap dengan tulisan Arab berharakat, cara baca (latin), arti bahasa Indonesia, dan audio pelafalan asli.
           </p>
-          <div class="flex flex-wrap gap-2 text-xs">
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <div class="stat-num"><span data-count="22">22</span></div>
+              <div class="stat-label">Kosakata Arab</div>
+            </div>
+            <div class="hero-stat">
+              <div class="stat-num"><span data-count="37">37</span></div>
+              <div class="stat-label">Bank Soal Latihan</div>
+            </div>
+            <div class="hero-stat">
+              <div class="stat-num"><span data-count="15">15</span> <span class="text-sm font-semibold">soal</span></div>
+              <div class="stat-label">Simulasi ATS 30 menit</div>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2 text-xs mt-4">
             <span class="bg-white/25 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5">
               <span>✏️</span> 7 Alat Tulis & Sekolah
             </span>
@@ -642,7 +666,7 @@
   </div>
 
   <!-- ================= FOOTER ================= -->
-  <footer class="no-print bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-500">
+  <footer class="no-print app-footer bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-500">
     <div class="max-w-7xl mx-auto px-4 space-y-2">
       <p class="font-semibold text-slate-700">
         SDIT TAHFIDZ BINTANGKU KOTA PROBOLINGGO • TAHUN AJARAN 2026/2027
@@ -657,5 +681,6 @@
   <script src="js/data.js"></script>
   <script src="js/canvas.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/trend.js"></script>
 </body>
 </html>

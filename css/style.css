@@ -1,4 +1,6 @@
-/* Custom Styles for Web App Bahasa Arab Kelas 3 SDIT Tahfidz Bintangku */
+/* Kelas Bintang — Trendsetter theme: dark elegant default + mode terang.
+   Konsep: papan tulis kaca di atas langit malam emerald-teal + aksen amber bintang.
+   Mode terang = kelas pagi kertas. Semua konten & logika tidak berubah. */
 
 @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Scheherazade+New:wght@400;700&family=Fredoka:wght@500;600;700&display=swap');
 
@@ -6,13 +8,114 @@
   --font-arabic: 'Amiri', 'Scheherazade New', serif;
   --font-body: 'Plus Jakarta Sans', sans-serif;
   --font-title: 'Fredoka', sans-serif;
+
+  /* Mode terang: kelas pagi */
+  --bg1: #f2f6f1;
+  --card: #ffffff;
+  --ink: #0f1f18;
+  --muted: #57705f;
+  --faint: #8ba393;
+  --line: rgba(16, 60, 40, 0.12);
+  --brand: #059669;
+  --brand-strong: #047857;
+  --brand-soft: rgba(16, 185, 129, 0.12);
+  --accent: #d97706;
+  --accent-soft: rgba(245, 158, 11, 0.14);
+  --header-bg: rgba(255, 255, 255, 0.82);
+  --inset: #eef4ee;
+  --chip: #e8efe9;
+  --card-shadow: 0 20px 44px -20px rgba(6, 78, 59, 0.28);
+  --glow: 0 18px 44px -14px rgba(5, 150, 105, 0.45);
+  --orb-opacity: 0.5;
+  --grain-opacity: 0.05;
+}
+
+[data-theme="dark"] {
+  /* Mode malam: langit kelas bintang (default) */
+  --bg1: #060f0b;
+  --card: rgba(15, 32, 24, 0.82);
+  --ink: #e9f5ee;
+  --muted: #a4beb0;
+  --faint: #6d887b;
+  --line: rgba(148, 255, 200, 0.13);
+  --brand: #34d399;
+  --brand-strong: #6ee7b7;
+  --brand-soft: rgba(52, 211, 153, 0.13);
+  --accent: #fbbf24;
+  --accent-soft: rgba(251, 191, 36, 0.13);
+  --header-bg: rgba(6, 15, 11, 0.74);
+  --inset: rgba(52, 211, 153, 0.07);
+  --chip: rgba(148, 255, 200, 0.1);
+  --card-shadow: 0 26px 60px -22px rgba(0, 0, 0, 0.75);
+  --glow: 0 0 0 1px rgba(52, 211, 153, 0.35), 0 18px 50px -14px rgba(52, 211, 153, 0.35);
+  --orb-opacity: 0.65;
+  --grain-opacity: 0.07;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   font-family: var(--font-body);
-  background-color: #f8fafc;
-  color: #1e293b;
   -webkit-font-smoothing: antialiased;
+}
+
+body.bg-slate-50 {
+  background-color: var(--bg1);
+  background-image:
+    radial-gradient(900px 480px at 12% -6%, rgba(16, 185, 129, 0.14), transparent 60%),
+    radial-gradient(760px 420px at 88% 4%, rgba(45, 212, 191, 0.12), transparent 60%),
+    radial-gradient(700px 500px at 50% 110%, rgba(245, 158, 11, 0.08), transparent 60%);
+  background-attachment: fixed;
+  color: var(--ink);
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+body.text-slate-800 {
+  color: var(--ink);
+}
+
+::selection {
+  background: var(--brand);
+  color: #fff;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Lapisan langit: orbs + grain */
+.bg-orbs {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  overflow: hidden;
+  opacity: var(--orb-opacity);
+  background:
+    radial-gradient(520px 520px at 8% 12%, rgba(16, 185, 129, 0.22), transparent 65%),
+    radial-gradient(640px 640px at 92% 8%, rgba(45, 212, 191, 0.18), transparent 65%),
+    radial-gradient(560px 560px at 78% 92%, rgba(251, 191, 36, 0.14), transparent 65%),
+    radial-gradient(700px 700px at 12% 88%, rgba(5, 150, 105, 0.16), transparent 65%);
+  animation: orbDrift 22s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes orbDrift {
+  to {
+    transform: translate3d(2%, -2%, 0) scale(1.06);
+  }
+}
+
+.bg-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  opacity: var(--grain-opacity);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.6'/%3E%3C/svg%3E");
+  pointer-events: none;
 }
 
 .font-arabic {
@@ -43,11 +146,223 @@ body {
   font-family: var(--font-arabic);
 }
 
+/* Header kaca + topbar resmi */
+header.app-header {
+  background: var(--header-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+[data-theme="dark"] header.app-header {
+  border-color: var(--line);
+  box-shadow: 0 12px 40px -18px rgba(0, 0, 0, 0.8);
+}
+
+.app-topbar {
+  background: linear-gradient(90deg, #064e3b, #047857 45%, #065f46) !important;
+  box-shadow: 0 6px 24px -10px rgba(4, 120, 87, 0.7);
+}
+
+footer.app-footer {
+  background: var(--header-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+[data-theme="dark"] footer.app-footer {
+  border-color: var(--line);
+  color: var(--muted);
+}
+
+/* Tombol tema malam/siang */
+.theme-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--chip);
+  color: var(--ink);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.3s ease;
+}
+
+.theme-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--glow);
+}
+
+.theme-btn .icon-sun {
+  display: none;
+}
+
+[data-theme="light"] .theme-btn .icon-sun {
+  display: block;
+}
+
+[data-theme="light"] .theme-btn .icon-moon {
+  display: none;
+}
+
+/* Tab navigasi: rasa fisik */
+button.trend-tab {
+  position: relative;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+button.trend-tab:hover {
+  transform: translateY(-2px);
+}
+
+button.trend-tab.bg-emerald-50 {
+  box-shadow: 0 0 0 1.5px var(--brand), 0 12px 28px -14px rgba(5, 150, 105, 0.6);
+}
+
+[data-theme="dark"] button.trend-tab.bg-emerald-50 {
+  box-shadow: 0 0 0 1.5px rgba(52, 211, 153, 0.7), 0 0 26px -6px rgba(52, 211, 153, 0.45);
+}
+
+/* Chip filter aktif menyala */
+[data-vocab-filter].bg-emerald-600,
+[data-quiz-filter].bg-emerald-600 {
+  box-shadow: 0 10px 26px -10px rgba(5, 150, 105, 0.7);
+}
+
+[data-theme="dark"] [data-vocab-filter].bg-emerald-600,
+[data-theme="dark"] [data-quiz-filter].bg-emerald-600 {
+  background-color: #10b981;
+  box-shadow: 0 0 24px -4px rgba(52, 211, 153, 0.6);
+}
+
+/* Hero mesh + huruf melayang */
+.hero-mesh {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: linear-gradient(120deg, #065f46, #0d9488 55%, #047857) !important;
+}
+
+.hero-mesh::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(251, 191, 36, 0.4), transparent 42%),
+    radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.28), transparent 36%),
+    radial-gradient(circle at 60% 92%, rgba(16, 185, 129, 0.55), transparent 46%);
+  animation: heroDrift 14s ease-in-out infinite alternate;
+  z-index: 0;
+}
+
+.hero-mesh::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.22) 50%, transparent 60%);
+  transform: translateX(-70%);
+  animation: sheen 7s ease-in-out infinite;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.hero-mesh > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes heroDrift {
+  to {
+    transform: translate3d(4%, -3%, 0) scale(1.08) rotate(2deg);
+  }
+}
+
+@keyframes sheen {
+  0%, 55% {
+    transform: translateX(-70%);
+  }
+  100% {
+    transform: translateX(70%);
+  }
+}
+
+[data-theme="dark"] .hero-mesh {
+  background: linear-gradient(120deg, #03231a, #064e3b 55%, #065f46) !important;
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.3), 0 24px 70px -24px rgba(16, 185, 129, 0.5);
+}
+
+.float-ar {
+  position: absolute;
+  font-family: var(--font-arabic);
+  color: #fff;
+  opacity: 0.16;
+  pointer-events: none;
+  animation: floaty 7s ease-in-out infinite;
+  z-index: 0;
+}
+
+@keyframes floaty {
+  50% {
+    transform: translateY(-14px) rotate(-4deg);
+  }
+}
+
+/* Statistik hero */
+.hero-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.hero-stat {
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+  border-radius: 14px;
+  padding: 8px 14px;
+  min-width: 104px;
+}
+
+.hero-stat .stat-num {
+  font-family: var(--font-title);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.hero-stat .stat-label {
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+/* Kartu dinamis: efek fisik */
+.trend-card {
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.3, 1.15), box-shadow 0.3s ease, border-color 0.3s ease;
+  will-change: transform;
+}
+
+.trend-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--glow);
+  border-color: var(--brand);
+}
+
+/* Tombol: rasa tekan fisik */
+button:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 /* Card Transitions & Glassmorphism */
 .glass-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--card);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  border: 1px solid var(--line);
 }
 
 .card-hover {
@@ -56,16 +371,32 @@ body {
 
 .card-hover:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 24px -6px rgba(16, 185, 129, 0.12), 0 8px 12px -4px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--glow);
+}
+
+/* Animasi masuk bertahap */
+.rv {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.6s ease var(--rd, 0ms), transform 0.6s cubic-bezier(0.2, 0.7, 0.3, 1) var(--rd, 0ms);
+}
+
+.rv.in {
+  opacity: 1;
+  transform: none;
 }
 
 /* Notebook tracing grid background for canvas */
 .canvas-grid {
   background-color: #ffffff;
-  background-image: 
+  background-image:
     linear-gradient(#f1f5f9 1px, transparent 1px),
     linear-gradient(90deg, #f1f5f9 1px, transparent 1px);
   background-size: 20px 20px;
+}
+
+[data-theme="dark"] .canvas-grid {
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.3), 0 0 34px -8px rgba(52, 211, 153, 0.35);
 }
 
 .notebook-lines {
@@ -91,6 +422,11 @@ body {
   background-color: #fef08a;
   color: #854d0e;
   transform: scale(1.05);
+}
+
+[data-theme="dark"] .story-word:hover {
+  background-color: rgba(251, 191, 36, 0.25);
+  color: #fde68a;
 }
 
 .story-word.active-word {
@@ -122,6 +458,10 @@ body {
   transform: rotateY(180deg);
 }
 
+[data-theme="dark"] #flashcard-inner {
+  box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.3), 0 30px 70px -24px rgba(16, 185, 129, 0.45);
+}
+
 /* Sound wave animation */
 @keyframes pulse-ring {
   0% {
@@ -149,22 +489,241 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--faint);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--brand);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+/* =========================================================
+   MODE MALAM: selaraskan utilitas terang ke token malam
+   ========================================================= */
+[data-theme="dark"] .bg-white {
+  background-color: var(--card);
+}
+
+[data-theme="dark"] .bg-slate-50 {
+  background-color: var(--inset);
+}
+
+[data-theme="dark"] .bg-slate-100 {
+  background-color: var(--chip);
+}
+
+[data-theme="dark"] .bg-slate-200 {
+  background-color: rgba(148, 255, 200, 0.14);
+}
+
+[data-theme="dark"] .bg-emerald-50 {
+  background-color: var(--brand-soft);
+}
+
+[data-theme="dark"] .bg-emerald-100 {
+  background-color: rgba(52, 211, 153, 0.17);
+}
+
+[data-theme="dark"] .bg-amber-50 {
+  background-color: var(--accent-soft);
+}
+
+[data-theme="dark"] .bg-amber-100 {
+  background-color: rgba(251, 191, 36, 0.16);
+}
+
+[data-theme="dark"] .bg-red-50 {
+  background-color: rgba(248, 113, 113, 0.1);
+}
+
+[data-theme="dark"] .bg-red-100 {
+  background-color: rgba(248, 113, 113, 0.15);
+}
+
+[data-theme="dark"] .bg-blue-100 {
+  background-color: rgba(147, 197, 253, 0.15);
+}
+
+[data-theme="dark"] .bg-purple-100 {
+  background-color: rgba(196, 181, 253, 0.15);
+}
+
+[data-theme="dark"] .text-slate-800,
+[data-theme="dark"] .text-slate-700 {
+  color: var(--ink);
+}
+
+[data-theme="dark"] .text-slate-600,
+[data-theme="dark"] .text-slate-500 {
+  color: var(--muted);
+}
+
+[data-theme="dark"] .text-slate-400 {
+  color: var(--faint);
+}
+
+[data-theme="dark"] .text-emerald-900,
+[data-theme="dark"] .text-emerald-800 {
+  color: #a7f3d0;
+}
+
+[data-theme="dark"] .text-emerald-700 {
+  color: var(--brand-strong);
+}
+
+[data-theme="dark"] .text-emerald-600 {
+  color: var(--brand);
+}
+
+[data-theme="dark"] .text-amber-900,
+[data-theme="dark"] .text-amber-800 {
+  color: #fcd34d;
+}
+
+[data-theme="dark"] .text-red-900,
+[data-theme="dark"] .text-red-700 {
+  color: #fca5a5;
+}
+
+[data-theme="dark"] .text-red-600 {
+  color: #f87171;
+}
+
+[data-theme="dark"] .text-blue-800 {
+  color: #93c5fd;
+}
+
+[data-theme="dark"] .border-slate-200,
+[data-theme="dark"] .border-slate-100,
+[data-theme="dark"] .border-slate-300 {
+  border-color: var(--line);
+}
+
+[data-theme="dark"] .border-emerald-200,
+[data-theme="dark"] .border-emerald-300 {
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+[data-theme="dark"] .border-emerald-600 {
+  border-color: var(--brand);
+}
+
+[data-theme="dark"] .border-red-200 {
+  border-color: rgba(248, 113, 113, 0.35);
+}
+
+[data-theme="dark"] .border-red-500 {
+  border-color: #f87171;
+}
+
+[data-theme="dark"] .border-amber-200 {
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
+[data-theme="dark"] .border-blue-200 {
+  border-color: rgba(147, 197, 253, 0.35);
+}
+
+[data-theme="dark"] #vocab-search,
+[data-theme="dark"] #tracing-word-select {
+  background-color: #0c1f16;
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+[data-theme="dark"] #tracing-word-select option {
+  background-color: #0c1f16;
+  color: var(--ink);
+}
+
+/* Lembar cetak selalu kertas putih (metafora dokumen) */
+[data-theme="dark"] #print-area {
+  background: #ffffff;
+  color: #000000;
+  border-color: #e2e8f0;
+}
+
+[data-theme="dark"] #print-area .bg-white {
+  background-color: #ffffff;
+}
+
+[data-theme="dark"] #print-area .bg-slate-100 {
+  background-color: #f1f5f9;
+}
+
+[data-theme="dark"] #print-area .bg-slate-200 {
+  background-color: #e2e8f0;
+}
+
+[data-theme="dark"] #print-area .bg-slate-50 {
+  background-color: #f8fafc;
+}
+
+[data-theme="dark"] #print-area .text-slate-500 {
+  color: #64748b;
+}
+
+[data-theme="dark"] #print-area .text-slate-600 {
+  color: #475569;
+}
+
+/* Gerak dikurangi: hormati pengguna */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .bg-orbs,
+  .hero-mesh::before,
+  .hero-mesh::after,
+  .float-ar,
+  .pulse-audio {
+    animation: none;
+  }
+
+  .rv {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .trend-card,
+  .card-hover,
+  button.trend-tab,
+  .theme-btn {
+    transition: none;
+  }
 }
 
 /* =========================================
    PRINT STYLES FOR EXAM WORKSHEET (Ctrl+P / PDF)
    ========================================= */
 @media print {
+  .rv {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .bg-orbs,
+  .bg-grain,
+  .hero-mesh::before,
+  .hero-mesh::after,
+  .float-ar {
+    display: none !important;
+  }
+
   body {
     background: #ffffff !important;
     color: #000000 !important;
