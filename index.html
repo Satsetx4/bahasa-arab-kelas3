@@ -6,6 +6,18 @@
   <meta name="theme-color" content="#07120d">
   <title>Bahasa Arab Kelas 3 SDIT Tahfidz Bintangku - Materi Interaktif & Bank Soal</title>
   
+  <!-- Anti-FOUC Theme Script (Mencegah kedipan layar putih/gelap saat awal buka) -->
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('arab3-theme') || 'dark';
+        if (t !== 'dark' && t !== 'light') t = 'dark';
+        document.documentElement.setAttribute('data-theme', t);
+        document.documentElement.classList.toggle('dark', t === 'dark');
+      } catch (e) {}
+    })();
+  </script>
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   
@@ -38,7 +50,7 @@
     }
   </script>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased pb-20 sm:pb-0">
   <div class="bg-orbs" aria-hidden="true"></div>
   <div class="bg-grain" aria-hidden="true"></div>
 
@@ -103,7 +115,7 @@
         </button>
         <button data-tab-target="kuis" class="trend-tab px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
           <i data-lucide="help-circle" class="w-4 h-4"></i>
-          <span>4. Bank Soal Interaktif (35 Soal)</span>
+          <span>4. Bank Soal Interaktif (37 Soal)</span>
         </button>
         <button data-tab-target="asesmen" class="trend-tab px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
           <i data-lucide="check-circle-2" class="w-4 h-4"></i>
@@ -118,7 +130,7 @@
   </header>
 
   <!-- ================= KONTEN UTAMA ================= -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 pb-24 sm:pb-8">
 
     <!-- ======================================================== -->
     <!-- TAB 1: MATERI & KOSAKATA LENGKAP -->
@@ -429,7 +441,7 @@
     </section>
 
     <!-- ======================================================== -->
-    <!-- TAB 4: BANK SOAL INTERAKTIF (35 SOAL LENGKAP) -->
+    <!-- TAB 4: BANK SOAL INTERAKTIF (37 SOAL LENGKAP) -->
     <!-- ======================================================== -->
     <section id="tab-kuis" class="tab-section hidden">
       <!-- Header Kuis & Filter -->
@@ -464,7 +476,7 @@
           <span>📊 Status Pengerjaan:</span>
           <span id="quiz-live-score" class="bg-white px-3 py-1 rounded-lg border border-emerald-300 shadow-xs">Benar: 0 / 0</span>
         </div>
-        <span id="quiz-total-count" class="text-slate-500 font-medium">35 Butir Soal</span>
+        <span id="quiz-total-count" class="text-slate-500 font-medium">37 Butir Soal</span>
       </div>
 
       <!-- Container Daftar Soal -->
@@ -662,6 +674,93 @@
     </div>
   </div>
 
+  <!-- ================= MODAL KONFIRMASI KUMPULKAN ASESMEN ================= -->
+  <div id="exam-confirm-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 text-center space-y-4">
+      <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-3xl mx-auto shadow-inner">
+        📝
+      </div>
+      <div>
+        <h4 class="font-bold text-slate-800 text-base">Kumpulkan Asesmen Sekarang?</h4>
+        <p id="exam-confirm-status" class="text-xs text-slate-500 mt-1">
+          Kamu sudah menjawab 0 dari 15 soal.
+        </p>
+      </div>
+      <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 text-left space-y-1">
+        <div class="flex items-center justify-between font-semibold">
+          <span>Sisa Waktu Ujian:</span>
+          <span id="exam-confirm-time" class="font-mono text-emerald-700 font-bold">30:00</span>
+        </div>
+        <p class="text-[11px] text-slate-400">Pastikan kamu sudah memeriksa semua jawaban dengan teliti sebelum mengirim.</p>
+      </div>
+      <div class="flex items-center gap-2 pt-2">
+        <button 
+          id="exam-modal-cancel-btn"
+          onclick="closeExamConfirmModal()"
+          class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors">
+          Periksa Lagi
+        </button>
+        <button 
+          id="exam-modal-submit-btn"
+          onclick="confirmSubmitExam()"
+          class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-colors shadow-md">
+          Ya, Kumpulkan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL KONFIRMASI RESET DATA ================= -->
+  <div id="reset-confirm-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 text-center space-y-4">
+      <div class="w-14 h-14 rounded-2xl bg-red-100 text-red-700 flex items-center justify-center text-3xl mx-auto">
+        🔄
+      </div>
+      <div>
+        <h4 class="font-bold text-slate-800 text-base">Mulai dari Awal?</h4>
+        <p class="text-xs text-slate-500 mt-1">
+          Semua progres jawaban kuis, skor, dan draft ujian akan dikosongkan dari browser ini.
+        </p>
+      </div>
+      <div class="flex items-center gap-2 pt-2">
+        <button 
+          onclick="closeResetModal()"
+          class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors">
+          Batal
+        </button>
+        <button 
+          onclick="confirmResetAllData()"
+          class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition-colors shadow-md">
+          Ya, Bersihkan
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MOBILE BOTTOM NAVIGATION BAR ================= -->
+  <nav id="mobile-bottom-nav" class="no-print sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 border-t border-slate-200 backdrop-blur-md px-2 py-1 flex items-center justify-around shadow-lg">
+    <button onclick="switchTab('materi')" data-mobile-tab="materi" class="flex flex-col items-center justify-center p-1.5 rounded-xl text-emerald-700 font-bold min-w-[56px] transition-all">
+      <i data-lucide="book-marked" class="w-5 h-5"></i>
+      <span class="text-[10px] mt-0.5">Materi</span>
+    </button>
+    <button onclick="switchTab('cerita')" data-mobile-tab="cerita" class="flex flex-col items-center justify-center p-1.5 rounded-xl text-slate-500 hover:text-slate-800 min-w-[56px] transition-all">
+      <i data-lucide="file-text" class="w-5 h-5"></i>
+      <span class="text-[10px] mt-0.5">Cerita</span>
+    </button>
+    <button onclick="switchTab('kitabah')" data-mobile-tab="kitabah" class="flex flex-col items-center justify-center p-1.5 rounded-xl text-slate-500 hover:text-slate-800 min-w-[56px] transition-all">
+      <i data-lucide="pen-tool" class="w-5 h-5"></i>
+      <span class="text-[10px] mt-0.5">Tulis</span>
+    </button>
+    <button onclick="switchTab('kuis')" data-mobile-tab="kuis" class="flex flex-col items-center justify-center p-1.5 rounded-xl text-slate-500 hover:text-slate-800 min-w-[56px] transition-all">
+      <i data-lucide="help-circle" class="w-5 h-5"></i>
+      <span class="text-[10px] mt-0.5">Soal</span>
+    </button>
+    <button onclick="switchTab('asesmen')" data-mobile-tab="asesmen" class="flex flex-col items-center justify-center p-1.5 rounded-xl text-slate-500 hover:text-slate-800 min-w-[56px] transition-all">
+      <i data-lucide="award" class="w-5 h-5"></i>
+      <span class="text-[10px] mt-0.5">Ujian</span>
+    </button>
+  </nav>
+
   <!-- ================= FOOTER ================= -->
   <footer class="no-print app-footer bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-500">
     <div class="max-w-7xl mx-auto px-4 space-y-2">
@@ -671,6 +770,14 @@
       <p>
         Bahan Pembelajaran & Bank Soal Asesmen Tengah Semester Ganjil - Bahasa Arab Kelas 3 (Maharatul Kitabah)
       </p>
+      <div class="pt-3">
+        <button 
+          onclick="openResetModal()" 
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold text-slate-400 hover:text-red-600 border border-slate-200 hover:border-red-300 rounded-xl transition-all">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+          <span>Mulai dari Awal / Bersihkan Data</span>
+        </button>
+      </div>
     </div>
   </footer>
 

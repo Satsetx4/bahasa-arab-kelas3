@@ -594,19 +594,75 @@ button:disabled {
   color: #475569;
 }
 
-/* HP: hemat & stabil — tanpa smooth scroll */
+/* HP: Taktil, cepat & stabil (120-180ms spring feel, hemat baterai) */
 @media (max-width: 820px), (pointer: coarse) {
   html {
     scroll-behavior: auto;
   }
 
-  .trend-card,
-  .card-hover,
-  button.trend-tab,
-  button:not(:disabled):active,
-  .theme-btn {
-    transition: none;
+  button:not(:disabled):active {
+    transform: scale(0.95);
+    transition: transform 0.1s cubic-bezier(0.2, 0, 0, 1);
   }
+
+  .trend-card:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+  }
+}
+
+/* =========================================================
+   MOBILE BOTTOM NAVIGATION & MODAL STYLING
+   ========================================================= */
+#mobile-bottom-nav {
+  box-shadow: 0 -4px 20px -6px rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="dark"] #mobile-bottom-nav {
+  background-color: rgba(11, 21, 14, 0.95);
+  border-color: var(--line);
+  box-shadow: 0 -4px 24px -6px rgba(0, 0, 0, 0.6);
+}
+
+#mobile-bottom-nav button {
+  transition: transform 0.12s ease, color 0.12s ease;
+}
+
+#mobile-bottom-nav button:active {
+  transform: scale(0.90);
+}
+
+#mobile-bottom-nav button.active-mobile-tab {
+  color: var(--brand) !important;
+  font-weight: 700;
+}
+
+[data-theme="dark"] #mobile-bottom-nav button {
+  color: var(--muted);
+}
+
+[data-theme="dark"] #mobile-bottom-nav button.active-mobile-tab {
+  color: #4ade80 !important;
+}
+
+/* Dark mode untuk modal konfirmasi */
+[data-theme="dark"] #exam-confirm-modal .bg-white,
+[data-theme="dark"] #reset-confirm-modal .bg-white {
+  background-color: var(--card) !important;
+  border-color: var(--line) !important;
+  color: var(--ink);
+}
+
+[data-theme="dark"] #exam-confirm-modal .bg-slate-50,
+[data-theme="dark"] #reset-confirm-modal .bg-slate-50 {
+  background-color: var(--inset) !important;
+  border-color: var(--line) !important;
+}
+
+[data-theme="dark"] #exam-confirm-modal .bg-slate-100,
+[data-theme="dark"] #reset-confirm-modal .bg-slate-100 {
+  background-color: var(--chip) !important;
+  color: var(--ink);
 }
 
 /* Gerak dikurangi: hormati preferensi pengguna */

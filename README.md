@@ -30,7 +30,7 @@
    - Garis panduan dasar (*baseline*) Khat Naskh.
    - Game interaktif puzzle menyambung huruf hijaiyah terpisah.
 
-4. **Bank Soal Lengkap (35 Butir Soal)**:
+4. **Bank Soal Lengkap (37 Butir Soal)**:
    - Format A: Soal Pemahaman Teks Cerita (sesuai kisi-kisi asesmen resmi).
    - Format B: Maharatul Kitabah (Menyambung Huruf Hijaiyah).
    - Format C: Ikmalul Huruf (Melengkapi huruf yang hilang).

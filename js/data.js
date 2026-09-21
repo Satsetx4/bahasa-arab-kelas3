@@ -390,7 +390,7 @@ const ARABIC_DATA = {
     }
   ],
 
-  // Bank Soal Komprehensif (35 Soal)
+  // Bank Soal Komprehensif (37 Butir Soal)
   question_bank: [
     // --- KELOMPOK 1: SOAL PEMAHAMAN TEKS CERITA (Sesuai Asesmen Resmi SDIT) ---
     {
@@ -509,8 +509,8 @@ const ARABIC_DATA = {
       type: "sambung_huruf",
       category: "Maharatul Kitabah (Menyambung Huruf)",
       question: "Sambunglah huruf-huruf hijaiyah berikut: مِ - سْ - طَ - رَ - ةٌ",
-      options: ["مِسْطَرَةٌ", "مِسْطَارَةٌ", "مَسْطَرَةٌ", "مِسْتَرَةٌ"],
-      correct_answer: 0,
+      options: ["مِسْطَارَةٌ", "مَسْطَرَةٌ", "مِسْطَرَةٌ", "مِسْتَرَةٌ"],
+      correct_answer: 2,
       target_word: "مِسْطَرَةٌ",
       letters: ["مِ", "سْ", "طَ", "رَ", "ةٌ"],
       meaning: "Penggaris",
@@ -533,8 +533,8 @@ const ARABIC_DATA = {
       type: "sambung_huruf",
       category: "Maharatul Kitabah (Menyambung Huruf)",
       question: "Sambunglah huruf-huruf hijaiyah berikut: مَ - كْ - تَ - بٌ",
-      options: ["مَكْتَبٌ", "مَكْتَابٌ", "مَكْبَتٌ", "مَتْكَبٌ"],
-      correct_answer: 0,
+      options: ["مَكْتَابٌ", "مَكْبَتٌ", "مَتْكَبٌ", "مَكْتَبٌ"],
+      correct_answer: 3,
       target_word: "مَكْتَبٌ",
       letters: ["مَ", "كْ", "تَ", "بٌ"],
       meaning: "Meja",
@@ -545,8 +545,8 @@ const ARABIC_DATA = {
       type: "sambung_huruf",
       category: "Maharatul Kitabah (Menyambung Huruf)",
       question: "Sambunglah huruf-huruf hijaiyah berikut: كُ - رْ - سِ - يٌّ",
-      options: ["كُرْسِيٌّ", "كُرْسِي", "كُرِسِيٌّ", "كَرْسِيٌّ"],
-      correct_answer: 0,
+      options: ["كُرْسِي", "كُرِسِيٌّ", "كُرْسِيٌّ", "كَرْسِيٌّ"],
+      correct_answer: 2,
       target_word: "كُرْسِيٌّ",
       letters: ["كُ", "رْ", "سِ", "يٌّ"],
       meaning: "Kursi",
@@ -569,8 +569,8 @@ const ARABIC_DATA = {
       type: "sambung_huruf",
       category: "Maharatul Kitabah (Menyambung Huruf)",
       question: "Sambunglah huruf-huruf hijaiyah berikut: مِ - صْ - بَ - ا - حٌ",
-      options: ["مِصْبَاحٌ", "مِسْبَاحٌ", "مَصْبَاحٌ", "مِصْبَحٌ"],
-      correct_answer: 0,
+      options: ["مِسْبَاحٌ", "مَصْبَاحٌ", "مِصْبَحٌ", "مِصْبَاحٌ"],
+      correct_answer: 3,
       target_word: "مِصْبَاحٌ",
       letters: ["مِ", "صْ", "بَ", "ا", "حٌ"],
       meaning: "Lampu",
@@ -594,8 +594,8 @@ const ARABIC_DATA = {
       type: "ikmal_huruf",
       category: "Maharatul Kitabah (Lengkapi Huruf)",
       question: "Lengkapilah huruf yang hilang pada kata 'Gunting': مِـ [...] ـصٌّ",
-      options: ["قَ", "كُ", "جَ", "فَ"],
-      correct_answer: 0,
+      options: ["كُ", "قَ", "جَ", "فَ"],
+      correct_answer: 1,
       full_word: "مِقَصٌّ",
       meaning: "Gunting",
       explanation: "Gunting adalah مِقَصٌّ (Miqassun), huruf yang hilang adalah قَ (qaf fathah)."
@@ -605,8 +605,8 @@ const ARABIC_DATA = {
       type: "ikmal_huruf",
       category: "Maharatul Kitabah (Lengkapi Huruf)",
       question: "Lengkapilah huruf yang hilang pada kata 'Kipas Angin': مِـ [...] ـوَحَةٌ",
-      options: ["رْ", "لْ", "نْ", "دْ"],
-      correct_answer: 0,
+      options: ["لْ", "نْ", "رْ", "دْ"],
+      correct_answer: 2,
       full_word: "مِرْوَحَةٌ",
       meaning: "Kipas Angin",
       explanation: "Kipas angin adalah مِرْوَحَةٌ (Mirwahatun), huruf yang hilang adalah رْ (ra' sukun)."
@@ -616,8 +616,8 @@ const ARABIC_DATA = {
       type: "ikmal_huruf",
       category: "Maharatul Kitabah (Lengkapi Huruf)",
       question: "Lengkapilah huruf yang hilang pada kata 'Pintu': بَـ [...] ـبٌ",
-      options: ["ا", "و", "ي", "ن"],
-      correct_answer: 0,
+      options: ["و", "ي", "ن", "ا"],
+      correct_answer: 3,
       full_word: "بَابٌ",
       meaning: "Pintu",
       explanation: "Pintu adalah بَابٌ (Baabun), huruf mad yang hilang adalah ا (alif)."
@@ -627,8 +627,8 @@ const ARABIC_DATA = {
       type: "ikmal_huruf",
       category: "Maharatul Kitabah (Lengkapi Huruf)",
       question: "Lengkapilah huruf yang hilang pada kata 'Sapu': مِـ [...] ـنَسَةٌ",
-      options: ["كْ", "قْ", "سْ", "لْ"],
-      correct_answer: 0,
+      options: ["قْ", "كْ", "سْ", "لْ"],
+      correct_answer: 1,
       full_word: "مِكْنَسَةٌ",
       meaning: "Sapu",
       explanation: "Sapu dalam bahasa Arab adalah مِكْنَسَةٌ (Miknasatun), huruf yang hilang adalah كْ (kaf sukun)."
@@ -638,8 +638,8 @@ const ARABIC_DATA = {
       type: "ikmal_huruf",
       category: "Maharatul Kitabah (Lengkapi Huruf)",
       question: "Lengkapilah huruf yang hilang pada kata 'Lemari': خِـ [...] ـانَةٌ",
-      options: ["زَ", "جَ", "رَ", "دَ"],
-      correct_answer: 0,
+      options: ["جَ", "رَ", "زَ", "دَ"],
+      correct_answer: 2,
       full_word: "خِزَانَةٌ",
       meaning: "Lemari",
       explanation: "Lemari adalah خِزَانَةٌ (Khizaanatun), huruf yang hilang adalah زَ (zai fathah)."
@@ -812,8 +812,8 @@ const ARABIC_DATA = {
       type: "terjemah_tulis",
       category: "Maharatul Kitabah (Penulisan)",
       question: "Bagaimanakah penulisan bahasa Arab yang benar untuk kata 'Lampu'?",
-      options: ["مِصْبَاحٌ", "مِسْبَاحٌ", "مِصْبَحٌ", "مُصْبَاحٌ"],
-      correct_answer: 0,
+      options: ["مِسْبَاحٌ", "مِصْبَاحٌ", "مِصْبَحٌ", "مُصْبَاحٌ"],
+      correct_answer: 1,
       explanation: "Penulisan yang benar adalah مِصْبَاحٌ (Misbaahun) menggunakan huruf shod (ص) bukan sin (س)."
     },
     {
@@ -821,8 +821,8 @@ const ARABIC_DATA = {
       type: "terjemah_tulis",
       category: "Maharatul Kitabah (Penulisan)",
       question: "Bagaimanakah penulisan bahasa Arab yang benar untuk kata 'Meja'?",
-      options: ["مَكْتَبٌ", "مَكْتَابٌ", "مَقْتَبٌ", "مَكْتِبٌ"],
-      correct_answer: 0,
+      options: ["مَكْتَابٌ", "مَقْتَبٌ", "مَكْتَبٌ", "مَكْتِبٌ"],
+      correct_answer: 2,
       explanation: "Penulisan yang benar adalah مَكْتَبٌ (Maktabun)."
     }
   ],

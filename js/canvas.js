@@ -24,12 +24,30 @@ class KitabahPad {
 
   initCanvasSize() {
     const container = this.canvas.parentElement;
+    if (!container) return;
     const rect = container.getBoundingClientRect();
-    
-    // Set actual resolution
-    this.canvas.width = rect.width || 700;
-    this.canvas.height = 360;
+    const newWidth = Math.floor(rect.width || 700);
+    // Di mobile, tinggi 300px agar tidak makan layar; di tablet/desktop 360px
+    const newHeight = window.innerWidth < 640 ? 300 : 360;
+
+    if (this.canvas.width === newWidth && this.canvas.height === newHeight) return;
+
+    let savedImage = null;
+    if (this.historyStep >= 0 && this.canvas.width > 0) {
+      savedImage = this.canvas.toDataURL();
+    }
+
+    this.canvas.width = newWidth;
+    this.canvas.height = newHeight;
     this.clearCanvas();
+
+    if (savedImage) {
+      const img = new Image();
+      img.onload = () => {
+        this.ctx.drawImage(img, 0, 0, newWidth, newHeight);
+      };
+      img.src = savedImage;
+    }
   }
 
   attachEvents() {
@@ -39,35 +57,34 @@ class KitabahPad {
     this.canvas.addEventListener('mouseup', () => this.endDraw());
     this.canvas.addEventListener('mouseleave', () => this.endDraw());
 
-    // Touch events for tablets & smartphones
+    // Touch events for tablets & smartphones (direct handling, smoother)
     this.canvas.addEventListener('touchstart', (e) => {
       e.preventDefault();
-      const touch = e.touches[0];
-      const mouseEvent = new MouseEvent('mousedown', {
-        clientX: touch.clientX,
-        clientY: touch.clientY
-      });
-      this.canvas.dispatchEvent(mouseEvent);
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        this.startDraw({ clientX: touch.clientX, clientY: touch.clientY });
+      }
     }, { passive: false });
 
     this.canvas.addEventListener('touchmove', (e) => {
       e.preventDefault();
-      const touch = e.touches[0];
-      const mouseEvent = new MouseEvent('mousemove', {
-        clientX: touch.clientX,
-        clientY: touch.clientY
-      });
-      this.canvas.dispatchEvent(mouseEvent);
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        this.draw({ clientX: touch.clientX, clientY: touch.clientY });
+      }
     }, { passive: false });
 
     this.canvas.addEventListener('touchend', (e) => {
       e.preventDefault();
-      const mouseEvent = new MouseEvent('mouseup', {});
-      this.canvas.dispatchEvent(mouseEvent);
+      this.endDraw();
     }, { passive: false });
 
+    let resizeTimer = null;
     window.addEventListener('resize', () => {
-      // Re-init with preserved drawing if needed
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        this.initCanvasSize();
+      }, 200);
     });
   }
 

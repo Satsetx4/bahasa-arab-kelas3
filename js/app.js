@@ -32,6 +32,7 @@ let appState = {
 // INISIALISASI APLIKASI
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
+  loadSavedState();
   initNavigation();
   initMateriTab();
   initCeritaTab();
@@ -41,11 +42,41 @@ document.addEventListener('DOMContentLoaded', () => {
   initCetakTab();
   initSpeechSynthesis();
 
+  // Restore tab terakhir yang dibuka pengguna jika ada
+  try {
+    const savedTab = localStorage.getItem('arab3_current_tab');
+    if (savedTab && document.getElementById(`tab-${savedTab}`)) {
+      switchTab(savedTab, false);
+    }
+  } catch (e) {}
+
   // Load Lucide icons
   if (window.lucide) {
     window.lucide.createIcons();
   }
 });
+
+function loadSavedState() {
+  try {
+    const savedQuizAnswers = localStorage.getItem('arab3_quiz_answers');
+    if (savedQuizAnswers) {
+      appState.quizAnswers = JSON.parse(savedQuizAnswers) || {};
+    }
+
+    const savedExam = localStorage.getItem('arab3_exam_state');
+    if (savedExam) {
+      const parsed = JSON.parse(savedExam);
+      if (parsed && parsed.questions && parsed.questions.length > 0 && !parsed.submitted && parsed.secondsRemaining > 0) {
+        appState.examQuestions = parsed.questions;
+        appState.examAnswers = parsed.answers || {};
+        appState.examSecondsRemaining = parsed.secondsRemaining;
+        appState.hasActiveExamSession = true;
+      }
+    }
+  } catch (e) {
+    console.warn('Storage read error:', e);
+  }
+}
 
 // ==========================================
 // SISTEM NAVIGASI TAB
@@ -69,7 +100,7 @@ function initNavigation() {
   }
 }
 
-function switchTab(tabId) {
+function switchTab(tabId, shouldScroll = true) {
   appState.currentTab = tabId;
 
   // Sembunyikan semua tab section
@@ -83,7 +114,7 @@ function switchTab(tabId) {
     targetSection.classList.remove('hidden');
   }
 
-  // Update styling button aktif
+  // Update styling button aktif di header
   document.querySelectorAll('[data-tab-target]').forEach(btn => {
     const isCurrent = btn.getAttribute('data-tab-target') === tabId;
     if (isCurrent) {
@@ -94,6 +125,23 @@ function switchTab(tabId) {
       btn.classList.add('text-slate-600', 'bg-white', 'hover:bg-slate-50');
     }
   });
+
+  // Update styling tombol aktif di Mobile Bottom Navigation Bar
+  document.querySelectorAll('#mobile-bottom-nav button[data-mobile-tab]').forEach(btn => {
+    const isCurrent = btn.getAttribute('data-mobile-tab') === tabId;
+    if (isCurrent) {
+      btn.classList.add('active-mobile-tab', 'text-emerald-700', 'font-bold');
+      btn.classList.remove('text-slate-500');
+    } else {
+      btn.classList.remove('active-mobile-tab', 'text-emerald-700', 'font-bold');
+      btn.classList.add('text-slate-500');
+    }
+  });
+
+  // Simpan preferensi tab
+  try {
+    localStorage.setItem('arab3_current_tab', tabId);
+  } catch (e) {}
 
   // Khusus tab kitabah: resize canvas agar pas dengan kontainer
   if (tabId === 'kitabah') {
@@ -108,11 +156,13 @@ function switchTab(tabId) {
 
   // Khusus tab kuis / asesmen
   if (tabId === 'kuis' && appState.quizQuestions.length === 0) {
-    loadQuizQuestions('all');
+    loadQuizQuestions(appState.quizFilterType || 'all');
   }
 
-  // Scroll to top
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Scroll to top jika diminta
+  if (shouldScroll) {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   if (window.lucide) {
     window.lucide.createIcons();
@@ -833,9 +883,12 @@ function initKuisTab() {
 
 function loadQuizQuestions(filterType = 'all') {
   appState.quizFilterType = filterType;
-  appState.quizAnswers = {};
   appState.quizSubmitted = false;
   appState.quizScore = 0;
+
+  try {
+    localStorage.setItem('arab3_quiz_filter', filterType);
+  } catch (e) {}
 
   if (filterType === 'all') {
     appState.quizQuestions = [...ARABIC_DATA.question_bank];
@@ -844,6 +897,7 @@ function loadQuizQuestions(filterType = 'all') {
   }
 
   renderQuizList();
+  updateLiveScore();
 }
 
 function renderQuizList() {
@@ -875,6 +929,9 @@ function renderQuizList() {
       typeBadge = '<span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full border border-emerald-200">🎯 Pilihan Ganda</span>';
     }
 
+    const answered = appState.quizAnswers[q.id];
+    const hasAnswered = answered !== undefined;
+
     return `
       <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm" id="quiz-item-${q.id}">
         <!-- Top Info -->
@@ -905,21 +962,42 @@ function renderQuizList() {
 
         <!-- Pilihan Ganda -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-          ${q.options.map((opt, optIdx) => `
-            <button 
-              id="opt-btn-${q.id}-${optIdx}"
-              onclick="selectQuizAnswer('${q.id}', ${optIdx})"
-              class="quiz-option-btn text-left p-3.5 rounded-xl border-2 border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/50 transition-all font-medium text-slate-700 flex items-center gap-3">
-              <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 text-xs font-bold flex items-center justify-center shrink-0">
-                ${['A', 'B', 'C', 'D'][optIdx]}
-              </span>
-              <span class="${opt.match(/[\u0600-\u06FF]/) ? 'font-arabic text-xl font-bold' : 'text-sm'}">${opt}</span>
-            </button>
-          `).join('')}
+          ${q.options.map((opt, optIdx) => {
+            let optClasses = 'quiz-option-btn text-left p-3.5 rounded-xl border-2 border-slate-200 font-medium text-slate-700 flex items-center gap-3 transition-all';
+            let badgeClasses = 'w-6 h-6 rounded-lg bg-slate-100 text-slate-600 text-xs font-bold flex items-center justify-center shrink-0';
+
+            if (hasAnswered) {
+              if (answered === optIdx && optIdx === q.correct_answer) {
+                optClasses = 'quiz-option-btn text-left p-3.5 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 font-bold flex items-center gap-3';
+                badgeClasses = 'w-6 h-6 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0';
+              } else if (answered === optIdx && optIdx !== q.correct_answer) {
+                optClasses = 'quiz-option-btn text-left p-3.5 rounded-xl border-2 border-red-500 bg-red-50 text-red-900 font-medium flex items-center gap-3';
+                badgeClasses = 'w-6 h-6 rounded-lg bg-red-600 text-white text-xs font-bold flex items-center justify-center shrink-0';
+              } else if (optIdx === q.correct_answer) {
+                optClasses = 'quiz-option-btn text-left p-3.5 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 font-bold flex items-center gap-3';
+                badgeClasses = 'w-6 h-6 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0';
+              }
+            } else {
+              optClasses += ' hover:border-emerald-400 hover:bg-emerald-50/50 cursor-pointer';
+            }
+
+            return `
+              <button 
+                id="opt-btn-${q.id}-${optIdx}"
+                ${hasAnswered ? 'disabled' : ''}
+                onclick="selectQuizAnswer('${q.id}', ${optIdx})"
+                class="${optClasses}">
+                <span class="${badgeClasses}">
+                  ${['A', 'B', 'C', 'D'][optIdx]}
+                </span>
+                <span class="${opt.match(/[\u0600-\u06FF]/) ? 'font-arabic text-xl font-bold' : 'text-sm'}">${opt}</span>
+              </button>
+            `;
+          }).join('')}
         </div>
 
-        <!-- Pembahasan (Awalnya tersembunyi) -->
-        <div id="explanation-${q.id}" class="hidden mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1">
+        <!-- Pembahasan -->
+        <div id="explanation-${q.id}" class="${hasAnswered ? '' : 'hidden'} mt-4 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1">
           <div class="font-bold text-slate-700 flex items-center gap-1.5">
             <i data-lucide="info" class="w-3.5 h-3.5 text-emerald-600"></i>
             <span>Kunci Jawaban & Pembahasan:</span>
@@ -939,17 +1017,19 @@ function selectQuizAnswer(questionId, selectedOptIdx) {
   const q = appState.quizQuestions.find(item => item.id === questionId);
   if (!q) return;
 
-  // Jika sudah dijawab, jangan double check
   if (appState.quizAnswers[questionId] !== undefined) return;
 
   appState.quizAnswers[questionId] = selectedOptIdx;
+
+  try {
+    localStorage.setItem('arab3_quiz_answers', JSON.stringify(appState.quizAnswers));
+  } catch (e) {}
 
   const isCorrect = selectedOptIdx === q.correct_answer;
   const chosenBtn = document.getElementById(`opt-btn-${questionId}-${selectedOptIdx}`);
   const correctBtn = document.getElementById(`opt-btn-${questionId}-${q.correct_answer}`);
   const expBox = document.getElementById(`explanation-${questionId}`);
 
-  // Disable all buttons in this question
   q.options.forEach((_, idx) => {
     const btn = document.getElementById(`opt-btn-${questionId}-${idx}`);
     if (btn) btn.disabled = true;
@@ -958,25 +1038,24 @@ function selectQuizAnswer(questionId, selectedOptIdx) {
   if (isCorrect) {
     playSoundEffect('correct');
     if (chosenBtn) {
-      chosenBtn.classList.remove('border-slate-200');
-      chosenBtn.classList.add('border-emerald-600', 'bg-emerald-50', 'text-emerald-900', 'font-bold');
-      chosenBtn.querySelector('span').classList.add('bg-emerald-600', 'text-white');
+      chosenBtn.className = 'quiz-option-btn text-left p-3.5 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 font-bold flex items-center gap-3';
+      const badge = chosenBtn.querySelector('span');
+      if (badge) badge.className = 'w-6 h-6 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0';
     }
   } else {
     playSoundEffect('wrong');
     if (chosenBtn) {
-      chosenBtn.classList.remove('border-slate-200');
-      chosenBtn.classList.add('border-red-500', 'bg-red-50', 'text-red-900');
-      chosenBtn.querySelector('span').classList.add('bg-red-600', 'text-white');
+      chosenBtn.className = 'quiz-option-btn text-left p-3.5 rounded-xl border-2 border-red-500 bg-red-50 text-red-900 font-medium flex items-center gap-3';
+      const badge = chosenBtn.querySelector('span');
+      if (badge) badge.className = 'w-6 h-6 rounded-lg bg-red-600 text-white text-xs font-bold flex items-center justify-center shrink-0';
     }
     if (correctBtn) {
-      correctBtn.classList.remove('border-slate-200');
-      correctBtn.classList.add('border-emerald-600', 'bg-emerald-50', 'text-emerald-900', 'font-bold');
-      correctBtn.querySelector('span').classList.add('bg-emerald-600', 'text-white');
+      correctBtn.className = 'quiz-option-btn text-left p-3.5 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 font-bold flex items-center gap-3';
+      const badge = correctBtn.querySelector('span');
+      if (badge) badge.className = 'w-6 h-6 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0';
     }
   }
 
-  // Tampilkan pembahasan
   if (expBox) {
     expBox.classList.remove('hidden');
   }
@@ -988,20 +1067,25 @@ function updateLiveScore() {
   const totalAnswered = Object.keys(appState.quizAnswers).length;
   let correctCount = 0;
 
-  appState.quizQuestions.forEach(q => {
-    if (appState.quizAnswers[q.id] === q.correct_answer) {
-      correctCount++;
+  const currentList = appState.quizQuestions.length > 0 ? appState.quizQuestions : ARABIC_DATA.question_bank;
+  let currentListAnswered = 0;
+
+  currentList.forEach(q => {
+    if (appState.quizAnswers[q.id] !== undefined) {
+      currentListAnswered++;
+      if (appState.quizAnswers[q.id] === q.correct_answer) {
+        correctCount++;
+      }
     }
   });
 
   const liveScoreDisplay = document.getElementById('quiz-live-score');
   if (liveScoreDisplay) {
-    liveScoreDisplay.textContent = `Benar: ${correctCount} / ${totalAnswered}`;
+    liveScoreDisplay.textContent = `Benar: ${correctCount} / ${currentListAnswered}`;
   }
 
-  // Jika semua sudah terjawab, berikan konfeti
-  if (totalAnswered === appState.quizQuestions.length && totalAnswered > 0) {
-    const percentage = Math.round((correctCount / totalAnswered) * 100);
+  if (currentListAnswered === currentList.length && currentListAnswered > 0) {
+    const percentage = Math.round((correctCount / currentListAnswered) * 100);
     if (percentage >= 70 && window.confetti) {
       window.confetti({
         particleCount: 100,
@@ -1026,15 +1110,79 @@ function initAsesmenTab() {
   const submitBtn = document.getElementById('submit-exam-btn');
   if (submitBtn) {
     submitBtn.addEventListener('click', () => {
-      if (confirm('Apakah kamu yakin ingin menyelesaikan dan mengumpulkan Asesmen sekarang?')) {
-        finishExamSimulation();
-      }
+      openExamConfirmModal();
     });
+  }
+
+  if (appState.hasActiveExamSession) {
+    showResumeExamOption();
   }
 }
 
+function showResumeExamOption() {
+  const introBox = document.getElementById('exam-intro-box');
+  if (!introBox) return;
+
+  const existingResume = document.getElementById('exam-resume-banner');
+  if (existingResume) existingResume.remove();
+
+  const mins = Math.floor(appState.examSecondsRemaining / 60);
+  const secs = appState.examSecondsRemaining % 60;
+  const answeredCount = Object.keys(appState.examAnswers).length;
+
+  const banner = document.createElement('div');
+  banner.id = 'exam-resume-banner';
+  banner.className = 'p-4 bg-emerald-50 border-2 border-emerald-500 rounded-2xl mb-4 text-left flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm';
+  banner.innerHTML = `
+    <div>
+      <div class="font-bold text-emerald-900 text-sm flex items-center gap-1.5">
+        <span>⏱️ Sesi Ujian Berlangsung Tersimpan</span>
+      </div>
+      <p class="text-xs text-emerald-800 mt-0.5">
+        Terjawab <strong>${answeredCount} dari 15 soal</strong> • Sisa waktu: <strong>${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}</strong>
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="resumeExamSimulation()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition-all">
+        Lanjutkan Ujian
+      </button>
+      <button onclick="discardAndRestartExam()" class="px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-xs rounded-xl transition-all">
+        Ulangi Baru
+      </button>
+    </div>
+  `;
+
+  introBox.insertBefore(banner, introBox.firstChild);
+}
+
+function resumeExamSimulation() {
+  document.getElementById('exam-intro-box').classList.add('hidden');
+  document.getElementById('exam-active-box').classList.remove('hidden');
+  document.getElementById('exam-result-box').classList.add('hidden');
+
+  renderExamQuestions();
+  startExamTimer();
+
+  const answeredCount = Object.keys(appState.examAnswers).length;
+  const progressText = document.getElementById('exam-progress-text');
+  if (progressText) {
+    progressText.textContent = `Terjawab: ${answeredCount} / ${appState.examQuestions.length}`;
+  }
+}
+
+function discardAndRestartExam() {
+  try {
+    localStorage.removeItem('arab3_exam_state');
+  } catch (e) {}
+  appState.hasActiveExamSession = false;
+  appState.examQuestions = [];
+  appState.examAnswers = {};
+  const banner = document.getElementById('exam-resume-banner');
+  if (banner) banner.remove();
+  startExamSimulation();
+}
+
 function startExamSimulation() {
-  // Ambil 15 soal representatif (soal teks cerita, maharatul kitabah, dan kosakata)
   const shuffled = [...ARABIC_DATA.question_bank].sort(() => 0.5 - Math.random());
   appState.examQuestions = shuffled.slice(0, 15);
   appState.examAnswers = {};
@@ -1047,53 +1195,72 @@ function startExamSimulation() {
 
   renderExamQuestions();
   startExamTimer();
+  saveExamStateToStorage();
 }
 
 function renderExamQuestions() {
   const container = document.getElementById('exam-questions-container');
   if (!container) return;
 
-  container.innerHTML = appState.examQuestions.map((q, idx) => `
-    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-      <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
-        <span class="text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-md">
-          Soal No. ${idx + 1}
-        </span>
-        <span class="text-xs text-slate-400">${q.category}</span>
-      </div>
+  container.innerHTML = appState.examQuestions.map((q, idx) => {
+    const selectedAnswer = appState.examAnswers[q.id];
 
-      ${q.story_snippet ? `
-        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-3 text-right">
-          <div class="font-arabic text-xl text-slate-800 font-bold" dir="rtl">« ${q.story_snippet} »</div>
+    return `
+      <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+          <span class="text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-md">
+            Soal No. ${idx + 1}
+          </span>
+          <span class="text-xs text-slate-400">${q.category}</span>
         </div>
-      ` : ''}
 
-      <div class="text-sm font-bold text-slate-800 mb-4">${q.question}</div>
+        ${q.story_snippet ? `
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 mb-3 text-right">
+            <div class="font-arabic text-xl text-slate-800 font-bold" dir="rtl">« ${q.story_snippet} »</div>
+          </div>
+        ` : ''}
 
-      <div class="space-y-2">
-        ${q.options.map((opt, optIdx) => `
-          <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
-            <input 
-              type="radio" 
-              name="exam-q-${q.id}" 
-              value="${optIdx}" 
-              onchange="recordExamAnswer('${q.id}', ${optIdx})"
-              class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-slate-300">
-            <span class="${opt.match(/[\u0600-\u06FF]/) ? 'font-arabic text-xl font-bold' : 'text-sm font-medium text-slate-700'}">${opt}</span>
-          </label>
-        `).join('')}
+        <div class="text-sm font-bold text-slate-800 mb-4">${q.question}</div>
+
+        <div class="space-y-2">
+          ${q.options.map((opt, optIdx) => `
+            <label class="flex items-center gap-3 p-3 rounded-xl border ${selectedAnswer === optIdx ? 'border-emerald-500 bg-emerald-50/50 font-bold' : 'border-slate-200'} hover:bg-slate-50 cursor-pointer transition-colors">
+              <input 
+                type="radio" 
+                name="exam-q-${q.id}" 
+                value="${optIdx}" 
+                ${selectedAnswer === optIdx ? 'checked' : ''}
+                onchange="recordExamAnswer('${q.id}', ${optIdx})"
+                class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-slate-300">
+              <span class="${opt.match(/[\u0600-\u06FF]/) ? 'font-arabic text-xl font-bold' : 'text-sm font-medium text-slate-700'}">${opt}</span>
+            </label>
+          `).join('')}
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function recordExamAnswer(questionId, optionIdx) {
   appState.examAnswers[questionId] = optionIdx;
+  saveExamStateToStorage();
+
   const answeredCount = Object.keys(appState.examAnswers).length;
   const progressText = document.getElementById('exam-progress-text');
   if (progressText) {
     progressText.textContent = `Terjawab: ${answeredCount} / ${appState.examQuestions.length}`;
   }
+}
+
+function saveExamStateToStorage() {
+  try {
+    localStorage.setItem('arab3_exam_state', JSON.stringify({
+      questions: appState.examQuestions,
+      answers: appState.examAnswers,
+      secondsRemaining: appState.examSecondsRemaining,
+      submitted: appState.examSubmitted
+    }));
+  } catch (e) {}
 }
 
 function startExamTimer() {
@@ -1115,12 +1282,63 @@ function startExamTimer() {
     if (timerDisplay) {
       timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     }
+
+    // Simpan waktu ke storage setiap 10 detik
+    if (appState.examSecondsRemaining % 10 === 0) {
+      saveExamStateToStorage();
+    }
   }, 1000);
+}
+
+// Modal Konfirmasi Ujian Kustom
+function openExamConfirmModal() {
+  const answeredCount = Object.keys(appState.examAnswers).length;
+  const totalCount = appState.examQuestions.length || 15;
+  const statusEl = document.getElementById('exam-confirm-status');
+  const timeEl = document.getElementById('exam-confirm-time');
+  const modal = document.getElementById('exam-confirm-modal');
+
+  if (statusEl) {
+    if (answeredCount === totalCount) {
+      statusEl.innerHTML = `<span class="text-emerald-600 font-bold">Alhamdulillah! Semua ${totalCount} soal sudah terjawab.</span> Siap untuk dikumpulkan?`;
+    } else {
+      const remaining = totalCount - answeredCount;
+      statusEl.innerHTML = `Kamu sudah menjawab <strong>${answeredCount} dari ${totalCount} soal</strong>.<br><span class="text-amber-600 font-bold">Masih ada ${remaining} soal yang belum dijawab!</span>`;
+    }
+  }
+
+  const mins = Math.floor(appState.examSecondsRemaining / 60);
+  const secs = appState.examSecondsRemaining % 60;
+  if (timeEl) {
+    timeEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }
+
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+}
+
+function closeExamConfirmModal() {
+  const modal = document.getElementById('exam-confirm-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+}
+
+function confirmSubmitExam() {
+  closeExamConfirmModal();
+  finishExamSimulation();
 }
 
 function finishExamSimulation() {
   if (appState.examTimerInterval) clearInterval(appState.examTimerInterval);
   appState.examSubmitted = true;
+
+  try {
+    localStorage.removeItem('arab3_exam_state');
+  } catch (e) {}
 
   let correctCount = 0;
   appState.examQuestions.forEach(q => {
@@ -1131,7 +1349,6 @@ function finishExamSimulation() {
 
   const score = Math.round((correctCount / appState.examQuestions.length) * 100);
 
-  // Tampilkan kotak hasil
   document.getElementById('exam-active-box').classList.add('hidden');
   const resultBox = document.getElementById('exam-result-box');
   resultBox.classList.remove('hidden');
@@ -1166,7 +1383,6 @@ function finishExamSimulation() {
     });
   }
 
-  // Tampilkan Review Jawaban
   const reviewContainer = document.getElementById('exam-review-container');
   if (reviewContainer) {
     reviewContainer.innerHTML = appState.examQuestions.map((q, idx) => {
@@ -1193,6 +1409,53 @@ function finishExamSimulation() {
       `;
     }).join('');
   }
+}
+
+// ==========================================
+// MODAL RESET DATA & MULAI DARI AWAL
+// ==========================================
+function openResetModal() {
+  const modal = document.getElementById('reset-confirm-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+  }
+}
+
+function closeResetModal() {
+  const modal = document.getElementById('reset-confirm-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+  }
+}
+
+function confirmResetAllData() {
+  try {
+    localStorage.removeItem('arab3_quiz_answers');
+    localStorage.removeItem('arab3_exam_state');
+    localStorage.removeItem('arab3_current_tab');
+  } catch (e) {}
+
+  appState.quizAnswers = {};
+  appState.examAnswers = {};
+  appState.examQuestions = [];
+  appState.hasActiveExamSession = false;
+  if (appState.examTimerInterval) clearInterval(appState.examTimerInterval);
+  appState.examSubmitted = false;
+
+  closeResetModal();
+
+  const resumeBanner = document.getElementById('exam-resume-banner');
+  if (resumeBanner) resumeBanner.remove();
+
+  document.getElementById('exam-intro-box')?.classList.remove('hidden');
+  document.getElementById('exam-active-box')?.classList.add('hidden');
+  document.getElementById('exam-result-box')?.classList.add('hidden');
+
+  renderQuizList();
+  updateLiveScore();
+  switchTab('materi');
 }
 
 // ==========================================
