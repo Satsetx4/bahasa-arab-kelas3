@@ -1,5 +1,5 @@
-// Logika Utama Aplikasi Pembelajaran & Bank Soal Bahasa Arab Kelas 3 SDIT
-// SDIT Tahfidz Bintangku Kota Probolinggo
+// Logika Utama Aplikasi Pembelajaran & Bank Soal Bahasa Arab Kelas 3 SD / MI
+// Modul Mandiri & Bank Soal Interaktif
 
 let appState = {
   currentTab: 'materi',
@@ -562,7 +562,7 @@ function initCeritaTab() {
     <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 flex items-start gap-3 text-amber-900 text-sm">
       <span class="text-xl">💡</span>
       <div>
-        <strong class="font-semibold">Petunjuk Belajar Siswa SDIT:</strong>
+        <strong class="font-semibold">Petunjuk Belajar Siswa:</strong>
         <p class="mt-0.5 text-xs text-amber-800">
           Klik pada setiap <strong>kata bahasa Arab</strong> untuk melihat arti dan fungsinya. Perhatikan benda-benda yang ada di dalam kelas serta alat tulis di dalam tas untuk persiapan asesmen tertulis!
         </p>
@@ -1480,7 +1480,7 @@ function renderPrintSheet() {
 
   printArea.innerHTML = `
     <div class="print-page max-w-4xl mx-auto bg-white p-6 md:p-10 text-black">
-      <!-- Kop Resmi SDIT Tahfidz Bintangku -->
+      <!-- Kop Lembar Asesmen -->
       <div class="border-b-4 border-double border-black pb-4 mb-6 text-center">
         <h1 class="text-xl md:text-2xl font-bold uppercase tracking-wide">${school.school}</h1>
         <h2 class="text-base md:text-lg font-semibold uppercase">${school.assessment_type} - ${school.academic_year}</h2>
@@ -1603,7 +1603,7 @@ function renderPrintSheet() {
 
       <!-- Footer Lembar Soal -->
       <div class="mt-8 text-center text-[10px] text-slate-500 border-t border-slate-300 pt-3">
-        Asesmen Tengah Semester Ganjil TA 2026/2027 • SDIT Tahfidz Bintangku Kota Probolinggo • Selamat Mengerjakan dengan Teliti & Jujur
+        Asesmen Tengah Semester Ganjil TA 2026/2027 • Bahasa Arab Kelas 3 SD / MI • Selamat Mengerjakan dengan Teliti & Jujur
       </div>
     </div>
   `;

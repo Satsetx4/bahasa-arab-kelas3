@@ -1,10 +1,10 @@
-# Web App Materi Interaktif & Bank Soal Bahasa Arab Kelas 3 SDIT
-### SDIT TAHFIDZ BINTANGKU KOTA PROBOLINGGO - TAHUN AJARAN 2026/2027
+# Web App Materi Interaktif & Bank Soal Bahasa Arab Kelas 3 SD / MI
+### MODUL PEMBELAJARAN & LATIHAN INTERAKTIF - TAHUN AJARAN 2026/2027
 **Fokus Keterampilan**: Maharatul Kitabah (Keterampilan Menulis) & Fahmul Maqru' (Pemahaman Teks Cerita)  
 **Tema**: Alat Tulis & Peralatan Sekolah (الأدوات المكتبية والمدرسية) & Benda di Dalam Kelas (في الفصل)  
 
 🌐 **Akses Web App Langsung (Live Demo)**:  
-👉 **[https://satsetx4.github.io/bahasa-arab-kelas3/](https://satsetx4.github.io/bahasa-arab-kelas3/)**
+👉 **[https://bahasa-arab-kelas3.vercel.app/](https://bahasa-arab-kelas3.vercel.app/)**
 
 ---
 
@@ -42,7 +42,7 @@
    - Laporan hasil ujian lengkap dengan skor skala 100, predikat Islami (*Mumtaz, Jayyid Jiddan, Jayyid, Maqbul*), dan review jawaban siswa.
 
 6. **Fitur Cetak Lembar Kerja / Worksheet PDF**:
-   - Format A4 siap cetak dengan Kop Surat resmi **SDIT TAHFIDZ BINTANGKU KOTA PROBOLINGGO**.
+   - Format A4 siap cetak dengan Kop Surat resmi Asesmen Bahasa Arab Kelas 3.
    - Kolom identitas siswa (Nama, No Absen, Tanggal, Kotak Nilai, Paraf Guru).
    - Dilengkapi garis putus-putus untuk lembar jawaban menulis siswa.
 
@@ -53,9 +53,8 @@
 Aplikasi ini bersifat mandiri (*standalone Single Page Application*) tanpa perlu instalasi server yang rumit:
 
 1. **Buka Langsung di Browser**:
-   - Cukup klik ganda (*double click*) file `index.html` atau buka browser (Google Chrome, Microsoft Edge, atau Safari).
-   - Atau buka file melalui path:  
-     `file:///C:/Users/Sekawan/.gemini/antigravity/scratch/bahasa-arab-sdit3/index.html`
+   - Cukup klik ganda (*double click*) file `index.html` di browser (Google Chrome, Microsoft Edge, Firefox, atau Safari).
+   - Atau jalankan local web server seperti `npx serve .` atau Live Server VS Code.
 
 2. **Dukungan Perangkat**:
    - Komputer / Laptop Guru (sangat cocok ditampilkan di proyektor kelas).

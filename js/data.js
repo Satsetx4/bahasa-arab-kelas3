@@ -1,10 +1,10 @@
-// Data Pembelajaran & Bank Soal Bahasa Arab Kelas 3 SDIT Tahfidz Bintangku Kota Probolinggo
+// Data Pembelajaran & Bank Soal Bahasa Arab Kelas 3 SD / MI
 // Tema: Alat Tulis & Peralatan Sekolah (الأدوات المكتبية والمدرسية) & Di Dalam Kelas (في الفصل)
 // Fokus: Maharatul Kitabah & Pemahaman Teks Cerita
 
 const ARABIC_DATA = {
   school_info: {
-    school: "SDIT TAHFIDZ BINTANGKU KOTA PROBOLINGGO",
+    school: "MODUL PEMBELAJARAN BAHASA ARAB",
     academic_year: "TAHUN AJARAN 2026/2027",
     subject: "Bahasa Arab",
     grade: "Kelas 3 (Tiga)",
@@ -392,7 +392,7 @@ const ARABIC_DATA = {
 
   // Bank Soal Komprehensif (37 Butir Soal)
   question_bank: [
-    // --- KELOMPOK 1: SOAL PEMAHAMAN TEKS CERITA (Sesuai Asesmen Resmi SDIT) ---
+    // --- KELOMPOK 1: SOAL PEMAHAMAN TEKS CERITA (Sesuai Kisi-Kisi Asesmen SD / MI) ---
     {
       id: "tc_1",
       type: "teks_cerita",
