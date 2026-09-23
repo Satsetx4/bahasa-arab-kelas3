@@ -316,8 +316,113 @@ button:disabled {
   background-size: 20px 20px;
 }
 
-[data-theme="dark"] .canvas-grid {
-  box-shadow: 0 0 0 1.5px rgba(74, 222, 128, 0.4);
+.canvas-stage {
+  height: 360px;
+  touch-action: none;
+  background: #ffffff;
+}
+
+.canvas-layer {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.canvas-background,
+.canvas-archive {
+  pointer-events: none;
+}
+
+.canvas-background { z-index: 0; }
+.canvas-archive { z-index: 1; }
+
+.canvas-ink {
+  z-index: 2;
+  background: transparent;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.canvas-control {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.student-action-button,
+.trend-tab,
+[data-vocab-filter],
+[data-quiz-filter],
+#theme-toggle-btn,
+.flashcard-control {
+  min-height: 44px;
+}
+
+.student-action-button,
+#theme-toggle-btn,
+.flashcard-control {
+  min-width: 44px;
+}
+
+.story-word {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 2px 8px;
+  line-height: 1.8;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.app-dialog {
+  width: min(30rem, calc(100vw - 2rem));
+  max-width: 30rem;
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  border: 0;
+  border-radius: 1.5rem;
+  background: transparent;
+  overflow: visible;
+}
+
+.app-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+}
+
+.dialog-content {
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+}
+
+.quiz-reset-control {
+  min-height: 44px;
+}
+
+.exam-sticky-header {
+  position: sticky;
+  top: calc(var(--app-header-height, 0px) + 0.5rem);
+  z-index: 30;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+.story-word:focus-visible {
+  outline: 3px solid #0f766e;
+  outline-offset: 2px;
+}
+
+button:active {
+  transform: scale(0.97);
 }
 
 .notebook-lines {
@@ -331,14 +436,6 @@ button:disabled {
 }
 
 /* Story Word Highlight */
-.story-word {
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-  border-radius: 6px;
-  padding: 2px 6px;
-  display: inline-block;
-}
-
 .story-word:hover {
   background-color: #fef08a;
   color: #854d0e;
