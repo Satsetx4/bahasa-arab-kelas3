@@ -1,28 +1,96 @@
 // Logika Utama Aplikasi Pembelajaran & Bank Soal Bahasa Arab Kelas 3 SD / MI
 // Modul Mandiri & Bank Soal Interaktif
 
+const EXAM_CONFIG = Object.freeze({
+  questionCount: 15,
+  durationMinutes: 30,
+  composition: Object.freeze({
+    teks_cerita: 2,
+    sambung_huruf: 3,
+    ikmal_huruf: 2,
+    pilihan_ganda: 5,
+    terjemah_tulis: 3
+  })
+});
+const EXAM_STORAGE_KEY = 'arab3_exam_state';
+const QUIZ_FILTER_STORAGE_KEY = 'arab3_quiz_filter';
+const QUIZ_PROGRESS_STORAGE_KEY = 'arab3_quiz_progress';
+const ACTIVE_TAB_STORAGE_KEY = 'arab3_active_tab';
+const LEGACY_ACTIVE_TAB_STORAGE_KEY = 'arab3_current_tab';
+const LEGACY_QUIZ_ANSWERS_STORAGE_KEY = 'arab3_quiz_answers';
+const QUESTION_TYPE_META = Object.freeze({
+  teks_cerita: Object.freeze({
+    filterLabel: '📖 Soal Cerita',
+    badgeLabel: '📖 Pemahaman Teks Cerita',
+    badgeClass: 'bg-blue-100 text-blue-800 border-blue-200'
+  }),
+  sambung_huruf: Object.freeze({
+    filterLabel: '✍️ Sambung Huruf',
+    badgeLabel: '✍️ Maharatul Kitabah',
+    badgeClass: 'bg-amber-100 text-amber-800 border-amber-200'
+  }),
+  ikmal_huruf: Object.freeze({
+    filterLabel: '🔤 Lengkapi Huruf',
+    badgeLabel: '🔤 Lengkapi Huruf',
+    badgeClass: 'bg-purple-100 text-purple-800 border-purple-200'
+  }),
+  pilihan_ganda: Object.freeze({
+    filterLabel: '🎯 Pilihan Ganda',
+    badgeLabel: '🎯 Pilihan Ganda',
+    badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-200'
+  }),
+  terjemah_tulis: Object.freeze({
+    filterLabel: '📝 Penulisan Arab',
+    badgeLabel: '📝 Penulisan / Kitabah',
+    badgeClass: 'bg-indigo-100 text-indigo-800 border-indigo-200'
+  })
+});
+
+function safeStorageGet(key) {
+  try {
+    return window.localStorage.getItem(key);
+  } catch (error) {
+    return null;
+  }
+}
+
+function safeStorageSet(key, value) {
+  try {
+    window.localStorage.setItem(key, value);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+function safeStorageRemove(key) {
+  try {
+    window.localStorage.removeItem(key);
+  } catch (error) {
+    // Penyimpanan tidak tersedia pada sebagian mode privat; aplikasi tetap dapat digunakan.
+  }
+}
+
 let appState = {
   currentTab: 'materi',
   selectedCategory: 'all',
   searchQuery: '',
   flashcardIndex: 0,
   flashcardFlipped: false,
-  
+
   // Quiz State
-  currentQuizIndex: 0,
   quizAnswers: {},
-  quizSubmitted: false,
   quizFilterType: 'all',
   quizQuestions: [],
-  quizScore: 0,
+  quizProgress: {},
 
   // Assessment Exam State
   examQuestions: [],
   examAnswers: {},
-  examStartTime: null,
   examSubmitted: false,
   examTimerInterval: null,
-  examSecondsRemaining: 30 * 60, // 30 Menit
+  examStartedAt: null,
+  examEndsAt: null,
 
   // Kitabah Pad Instance
   pad: null
@@ -32,50 +100,38 @@ let appState = {
 // INISIALISASI APLIKASI
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-  loadSavedState();
   initNavigation();
   initMateriTab();
   initCeritaTab();
   initKitabahTab();
   initKuisTab();
-  initAsesmenTab();
+  const activeExamRestored = initAsesmenTab();
   initCetakTab();
   initSpeechSynthesis();
+  initResetDataControls();
+  renderStudyCounts();
+  restoreActiveTab(activeExamRestored);
 
-  // Restore tab terakhir yang dibuka pengguna jika ada
-  try {
-    const savedTab = localStorage.getItem('arab3_current_tab');
-    if (savedTab && document.getElementById(`tab-${savedTab}`)) {
-      switchTab(savedTab, false);
-    }
-  } catch (e) {}
-
-  // Load Lucide icons
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
+  refreshIcons();
 });
 
-function loadSavedState() {
-  try {
-    const savedQuizAnswers = localStorage.getItem('arab3_quiz_answers');
-    if (savedQuizAnswers) {
-      appState.quizAnswers = JSON.parse(savedQuizAnswers) || {};
-    }
-
-    const savedExam = localStorage.getItem('arab3_exam_state');
-    if (savedExam) {
-      const parsed = JSON.parse(savedExam);
-      if (parsed && parsed.questions && parsed.questions.length > 0 && !parsed.submitted && parsed.secondsRemaining > 0) {
-        appState.examQuestions = parsed.questions;
-        appState.examAnswers = parsed.answers || {};
-        appState.examSecondsRemaining = parsed.secondsRemaining;
-        appState.hasActiveExamSession = true;
-      }
-    }
-  } catch (e) {
-    console.warn('Storage read error:', e);
-  }
+function initResetDataControls() {
+  const trigger = document.getElementById('reset-data-btn');
+  const dialog = document.getElementById('reset-data-modal');
+  trigger?.addEventListener('click', () => openAppDialog(dialog, trigger));
+  document.getElementById('cancel-reset-data-btn')?.addEventListener('click', () => dialog?.close());
+  document.getElementById('confirm-reset-data-btn')?.addEventListener('click', () => {
+    [
+      'arab3-theme',
+      ACTIVE_TAB_STORAGE_KEY,
+      LEGACY_ACTIVE_TAB_STORAGE_KEY,
+      QUIZ_FILTER_STORAGE_KEY,
+      QUIZ_PROGRESS_STORAGE_KEY,
+      LEGACY_QUIZ_ANSWERS_STORAGE_KEY,
+      EXAM_STORAGE_KEY
+    ].forEach(safeStorageRemove);
+    window.location.reload();
+  });
 }
 
 // ==========================================
@@ -83,12 +139,40 @@ function loadSavedState() {
 // ==========================================
 function initNavigation() {
   const navButtons = document.querySelectorAll('[data-tab-target]');
+  const header = document.querySelector('.app-header');
+  const updateHeaderOffset = () => {
+    if (header) document.documentElement.style.setProperty('--app-header-height', `${Math.ceil(header.getBoundingClientRect().height)}px`);
+  };
+  updateHeaderOffset();
+  if (header && 'ResizeObserver' in window) {
+    const headerObserver = new ResizeObserver(updateHeaderOffset);
+    headerObserver.observe(header);
+  } else {
+    window.addEventListener('resize', updateHeaderOffset);
+  }
+
   navButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
       const targetTab = btn.getAttribute('data-tab-target');
       switchTab(targetTab);
     });
+    btn.addEventListener('keydown', event => {
+      const tabs = [...navButtons];
+      const currentIndex = tabs.indexOf(btn);
+      let nextIndex = currentIndex;
+      if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length;
+      else if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+      else if (event.key === 'Home') nextIndex = 0;
+      else if (event.key === 'End') nextIndex = tabs.length - 1;
+      else return;
+      event.preventDefault();
+      tabs[nextIndex].focus();
+      switchTab(tabs[nextIndex].getAttribute('data-tab-target'));
+    });
   });
+
+  document.getElementById('header-print-btn')?.addEventListener('click', () => switchTab('cetak'));
+  document.getElementById('header-exam-btn')?.addEventListener('click', () => switchTab('asesmen'));
 
   // Mobile menu toggle if any
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
@@ -101,22 +185,28 @@ function initNavigation() {
 }
 
 function switchTab(tabId, shouldScroll = true) {
+  if (!document.getElementById(`tab-${tabId}`)) return;
   appState.currentTab = tabId;
+  safeStorageSet(ACTIVE_TAB_STORAGE_KEY, tabId);
 
   // Sembunyikan semua tab section
   document.querySelectorAll('.tab-section').forEach(sec => {
     sec.classList.add('hidden');
+    sec.setAttribute('aria-hidden', 'true');
   });
 
   // Tampilkan tab yang dipilih
   const targetSection = document.getElementById(`tab-${tabId}`);
   if (targetSection) {
     targetSection.classList.remove('hidden');
+    targetSection.setAttribute('aria-hidden', 'false');
   }
 
   // Update styling button aktif di header
   document.querySelectorAll('[data-tab-target]').forEach(btn => {
     const isCurrent = btn.getAttribute('data-tab-target') === tabId;
+    btn.setAttribute('aria-selected', String(isCurrent));
+    btn.tabIndex = isCurrent ? 0 : -1;
     if (isCurrent) {
       btn.classList.remove('text-slate-600', 'bg-white', 'hover:bg-slate-50');
       btn.classList.add('text-emerald-700', 'bg-emerald-50', 'border-emerald-600', 'shadow-sm', 'font-semibold');
@@ -138,25 +228,20 @@ function switchTab(tabId, shouldScroll = true) {
     }
   });
 
-  // Simpan preferensi tab
-  try {
-    localStorage.setItem('arab3_current_tab', tabId);
-  } catch (e) {}
-
   // Khusus tab kitabah: resize canvas agar pas dengan kontainer
   if (tabId === 'kitabah') {
     setTimeout(() => {
       if (!appState.pad) {
         appState.pad = new window.KitabahPad('kitabah-canvas');
       } else {
-        appState.pad.initCanvasSize();
+        appState.pad.resizeCanvas();
       }
     }, 150);
   }
 
   // Khusus tab kuis / asesmen
   if (tabId === 'kuis' && appState.quizQuestions.length === 0) {
-    loadQuizQuestions(appState.quizFilterType || 'all');
+    loadQuizQuestions(appState.quizFilterType);
   }
 
   // Scroll to top jika diminta
@@ -164,9 +249,13 @@ function switchTab(tabId, shouldScroll = true) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
+  refreshIcons();
+}
+
+function restoreActiveTab(activeExamRestored = false) {
+  const tabIds = ['materi', 'cerita', 'kitabah', 'kuis', 'asesmen', 'cetak'];
+  const savedTab = safeStorageGet(ACTIVE_TAB_STORAGE_KEY) || safeStorageGet(LEGACY_ACTIVE_TAB_STORAGE_KEY);
+  switchTab(activeExamRestored ? 'asesmen' : tabIds.includes(savedTab) ? savedTab : 'materi');
 }
 
 // ==========================================
@@ -175,36 +264,49 @@ function switchTab(tabId, shouldScroll = true) {
 let arabicVoice = null;
 
 function initSpeechSynthesis() {
-  if ('speechSynthesis' in window) {
-    const updateVoices = () => {
-      const voices = window.speechSynthesis.getVoices();
-      // Cari suara bahasa Arab (ar-SA, ar-EG, dll)
-      arabicVoice = voices.find(v => v.lang.startsWith('ar')) || null;
-    };
-    updateVoices();
-    window.speechSynthesis.onvoiceschanged = updateVoices;
-  }
+  const updateVoices = () => {
+    try {
+      const voices = window.speechSynthesis?.getVoices?.() || [];
+      arabicVoice = voices.find(voice => voice.lang?.startsWith('ar')) || null;
+    } catch (error) {
+      arabicVoice = null;
+    }
+  };
+  updateVoices();
+  if (window.speechSynthesis) window.speechSynthesis.onvoiceschanged = updateVoices;
 }
 
 function playArabicSpeech(text) {
-  if (!('speechSynthesis' in window)) {
-    alert('Peramban Anda belum mendukung fitur pemutar suara teks otomatis.');
-    return;
+  try {
+    if (!window.speechSynthesis || typeof window.SpeechSynthesisUtterance !== 'function') return false;
+    window.speechSynthesis.cancel();
+    const cleanText = String(text || '').replace(/[0-9.]/g, '').trim();
+    if (!cleanText) return false;
+    const utterance = new window.SpeechSynthesisUtterance(cleanText);
+    utterance.lang = 'ar-SA';
+    utterance.rate = 0.85;
+    if (arabicVoice) utterance.voice = arabicVoice;
+    window.speechSynthesis.speak(utterance);
+    return true;
+  } catch (error) {
+    return false;
   }
+}
 
-  window.speechSynthesis.cancel(); // Stop suara yang sedang berbunyi
-
-  const cleanText = text.replace(/[0-9.]/g, '').trim();
-  const utterance = new SpeechSynthesisUtterance(cleanText);
-  utterance.lang = 'ar-SA';
-  utterance.rate = 0.85; // Sedikit lebih lambat agar jelas untuk anak SD
-
-  if (arabicVoice) {
-    utterance.voice = arabicVoice;
+function refreshIcons() {
+  try {
+    window.lucide?.createIcons?.();
+  } catch (error) {
+    // Ikon dekoratif tidak boleh menghentikan materi utama.
   }
+}
 
-  // Efek visual tombol yang sedang berbunyi
-  window.speechSynthesis.speak(utterance);
+function playConfetti(options) {
+  try {
+    if (typeof window.confetti === 'function') window.confetti(options);
+  } catch (error) {
+    // Confetti hanya dekorasi; kegagalan tidak mengubah nilai latihan.
+  }
 }
 
 // Sound effect feedback sederhana via Web Audio API
@@ -249,6 +351,14 @@ function initMateriTab() {
 
   // Render awal
   renderVocabCards();
+  container?.addEventListener('click', event => {
+    const button = event.target.closest('[data-vocab-action]');
+    if (!button) return;
+    const vocabulary = ARABIC_DATA.vocabularies.find(item => item.id === button.getAttribute('data-vocab-id'));
+    if (!vocabulary) return;
+    if (button.getAttribute('data-vocab-action') === 'trace') openWordInTracingPad(vocabulary.arabic);
+    else playArabicSpeech(vocabulary.audio_text || vocabulary.arabic);
+  });
 
   // Search input
   if (searchInput) {
@@ -262,6 +372,7 @@ function initMateriTab() {
   categoryFilters.forEach(btn => {
     btn.addEventListener('click', () => {
       categoryFilters.forEach(b => {
+        b.setAttribute('aria-pressed', String(b === btn));
         b.classList.remove('bg-emerald-600', 'text-white', 'shadow');
         b.classList.add('bg-white', 'text-slate-700', 'border', 'border-slate-200');
       });
@@ -281,6 +392,8 @@ function initMateriTab() {
 
   if (switchFlashcardBtn && switchGridBtn) {
     switchFlashcardBtn.addEventListener('click', () => {
+      switchFlashcardBtn.setAttribute('aria-pressed', 'true');
+      switchGridBtn.setAttribute('aria-pressed', 'false');
       switchFlashcardBtn.classList.add('bg-emerald-600', 'text-white');
       switchFlashcardBtn.classList.remove('bg-slate-100', 'text-slate-700');
       switchGridBtn.classList.remove('bg-emerald-600', 'text-white');
@@ -292,6 +405,8 @@ function initMateriTab() {
     });
 
     switchGridBtn.addEventListener('click', () => {
+      switchGridBtn.setAttribute('aria-pressed', 'true');
+      switchFlashcardBtn.setAttribute('aria-pressed', 'false');
       switchGridBtn.classList.add('bg-emerald-600', 'text-white');
       switchGridBtn.classList.remove('bg-slate-100', 'text-slate-700');
       switchFlashcardBtn.classList.remove('bg-emerald-600', 'text-white');
@@ -304,12 +419,13 @@ function initMateriTab() {
 
   // Flashcard controls
   setupFlashcardControls();
+  updateFlashcardDisplay();
 }
 
 function getFilteredVocabularies() {
   return ARABIC_DATA.vocabularies.filter(v => {
     const matchCategory = appState.selectedCategory === 'all' || v.category === appState.selectedCategory;
-    const matchSearch = !appState.searchQuery || 
+    const matchSearch = !appState.searchQuery ||
       v.arabic.includes(appState.searchQuery) ||
       v.latin.toLowerCase().includes(appState.searchQuery) ||
       v.meaning.toLowerCase().includes(appState.searchQuery);
@@ -336,8 +452,8 @@ function renderVocabCards() {
 
   container.innerHTML = vocabs.map((item, idx) => {
     const isAlatTulis = item.category === 'alat_tulis';
-    const badgeColor = isAlatTulis 
-      ? 'bg-amber-100 text-amber-800 border-amber-200' 
+    const badgeColor = isAlatTulis
+      ? 'bg-amber-100 text-amber-800 border-amber-200'
       : 'bg-emerald-100 text-emerald-800 border-emerald-200';
     const categoryName = isAlatTulis ? 'Alat Tulis' : 'Benda Kelas';
 
@@ -354,10 +470,10 @@ function renderVocabCards() {
 
         <!-- Arabic Main Display -->
         <div class="text-center py-4 bg-gradient-to-b from-slate-50/70 to-emerald-50/30 rounded-xl mb-4 border border-slate-100 relative">
-          <button 
-            onclick="playArabicSpeech('${item.audio_text}')"
+          <button type="button" data-vocab-action="listen" data-vocab-id="${item.id}"
             title="Dengarkan Pelafalan"
-            class="absolute top-2 right-2 p-2 rounded-lg bg-white/80 hover:bg-emerald-600 hover:text-white text-emerald-600 border border-slate-200 shadow-sm transition-all">
+            aria-label="Dengarkan pelafalan ${item.meaning}"
+            class="student-action-button absolute top-2 right-2 rounded-lg bg-white/80 hover:bg-emerald-600 hover:text-white text-emerald-600 border border-slate-200 shadow-sm transition-all">
             <i data-lucide="volume-2" class="w-4 h-4"></i>
           </button>
           <div class="font-arabic text-4xl text-slate-800 font-bold leading-relaxed mb-1" dir="rtl">
@@ -389,15 +505,13 @@ function renderVocabCards() {
 
         <!-- Bottom Action -->
         <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-          <button 
-            onclick="openWordInTracingPad('${item.arabic}')"
-            class="text-emerald-600 hover:text-emerald-800 font-semibold inline-flex items-center gap-1">
+          <button type="button" data-vocab-action="trace" data-vocab-id="${item.id}"
+            class="student-action-button text-emerald-600 hover:text-emerald-800 font-semibold inline-flex items-center gap-1">
             <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
             <span>Latihan Tulis</span>
           </button>
-          <button 
-            onclick="playArabicSpeech('${item.arabic}')"
-            class="text-slate-500 hover:text-slate-700 inline-flex items-center gap-1">
+          <button type="button" data-vocab-action="listen" data-vocab-id="${item.id}"
+            class="student-action-button text-slate-500 hover:text-slate-700 inline-flex items-center gap-1">
             <i data-lucide="volume-1" class="w-3.5 h-3.5"></i>
             <span>Lafalkan</span>
           </button>
@@ -406,9 +520,7 @@ function renderVocabCards() {
     `;
   }).join('');
 
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
+  refreshIcons();
 }
 
 // Flashcard Interactive Functionality
@@ -500,7 +612,7 @@ function updateFlashcardDisplay() {
   document.getElementById('fc-back-arabic').textContent = item.arabic;
   document.getElementById('fc-back-example').textContent = item.example || '';
   document.getElementById('fc-back-trans').textContent = item.example_trans || '';
-  
+
   // Counter & Progress
   document.getElementById('fc-counter').textContent = `${appState.flashcardIndex + 1} / ${list.length}`;
   const progressBar = document.getElementById('fc-progress-bar');
@@ -530,6 +642,7 @@ function initCeritaTab() {
   if (!storyContainer) return;
 
   const mainStory = ARABIC_DATA.reading_materials[0];
+  const extraStory = ARABIC_DATA.reading_materials[1];
 
   let html = `
     <!-- Header Materi Cerita -->
@@ -545,9 +658,8 @@ function initCeritaTab() {
             <p class="text-emerald-100 text-lg font-medium">Judul: ${mainStory.title_id} (${mainStory.subtitle})</p>
           </div>
           <div class="flex items-center gap-2">
-            <button 
-              onclick="playFullStoryAudio()"
-              class="px-5 py-2.5 bg-white text-emerald-800 hover:bg-emerald-50 rounded-xl font-bold text-sm shadow-md transition-all flex items-center gap-2">
+            <button type="button" data-story-action="full-audio"
+              class="student-action-button px-5 py-2.5 bg-white text-emerald-800 hover:bg-emerald-50 rounded-xl font-bold text-sm shadow-md transition-all flex items-center gap-2">
               <i data-lucide="volume-2" class="w-4 h-4"></i>
               <span>Dengarkan Seluruh Teks</span>
             </button>
@@ -575,7 +687,7 @@ function initCeritaTab() {
 
   mainStory.paragraphs.forEach((p, idx) => {
     // Generate word spans
-    const wordSpans = p.words.map(w => {
+    const wordSpans = p.words.map((w, wordIndex) => {
       const isClassItem = w.type === 'benda_kelas';
       const isBagItem = w.type === 'alat_tulis';
       let typeBadge = '';
@@ -583,12 +695,13 @@ function initCeritaTab() {
       else if (isBagItem) typeBadge = 'border-b-2 border-amber-500 font-bold text-amber-900';
 
       return `
-        <span 
-          class="story-word ${typeBadge}" 
-          onclick="showWordDetail('${w.ar}', '${w.id}', '${w.type || ''}')"
-          title="${w.id}">
+        <button type="button"
+          class="story-word ${typeBadge}"
+          data-story-paragraph="${idx}" data-story-word="${wordIndex}"
+          aria-label="${w.ar}, arti: ${w.id}. Buka penjelasan kata."
+          title="Buka arti ${w.id}">
           ${w.ar}
-        </span>
+        </button>
       `;
     }).join(' ');
 
@@ -602,9 +715,8 @@ function initCeritaTab() {
             </span>
             <span class="text-xs font-semibold text-slate-500">Kalimat ke-${idx + 1}</span>
           </div>
-          <button 
-            onclick="playArabicSpeech('${p.sentence_ar}')"
-            class="text-xs text-emerald-700 bg-emerald-50 hover:bg-emerald-100 font-semibold px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5 transition-colors">
+          <button type="button" data-story-audio="${idx}"
+            class="student-action-button text-sm text-emerald-700 bg-emerald-50 hover:bg-emerald-100 font-semibold px-3 py-1.5 rounded-lg inline-flex items-center gap-1.5 transition-colors">
             <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
             <span>Dengarkan Kalimat</span>
           </button>
@@ -641,40 +753,68 @@ function initCeritaTab() {
   html += `
     </div>
 
-    <!-- Teks Latihan Tambahan: Di Hari Kebersihan Kelas -->
+    <!-- Teks Latihan Tambahan -->
     <div class="mt-12 pt-8 border-t-2 border-slate-200">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h3 class="font-bold text-lg text-slate-800">📖 Latihan Cerita Tambahan: فِي يَوْمِ النَّظَافَةِ</h3>
-          <p class="text-xs text-slate-500">Membaca teks baru untuk melatih kepekaan menemukan kosakata sapu (مِكْنَسَةٌ), tempat sampah (مَزْبَلَةٌ), dan rak (رَفٌّ).</p>
+          <h3 class="font-bold text-lg text-slate-800">📖 ${extraStory.title_id}: ${extraStory.title_ar}</h3>
+          <p class="text-sm text-slate-600">${extraStory.subtitle}</p>
         </div>
-        <button 
-          onclick="playArabicSpeech('الْفَصْلُ نَظِيفٌ جِدًّا. فِي الْفَصْلِ مِكْنَسَةٌ وَمَزْبَلَةٌ. عَلَى الرَّفِّ كُتُبٌ، وَالزُّجَاجُ صَافٍ.')"
-          class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold flex items-center gap-1">
+        <button type="button" data-story-action="extra-audio"
+          class="student-action-button px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold flex items-center gap-1">
           <i data-lucide="volume-2" class="w-3.5 h-3.5"></i>
-          <span>Putar Suara</span>
+          <span>Dengarkan cerita</span>
         </button>
       </div>
 
       <div class="bg-white rounded-2xl p-6 border border-slate-200 space-y-4">
-        <div class="font-arabic text-2xl text-slate-800 text-right leading-loose" dir="rtl">
-          الْفَصْلُ نَظِيفٌ جِدًّا. فِي الْفَصْلِ <span class="text-emerald-700 font-bold">مِكْنَسَةٌ</span> وَ<span class="text-emerald-700 font-bold">مَزْبَلَةٌ</span>. عَلَى <span class="text-emerald-700 font-bold">الرَّفِّ</span> كُتُبٌ، وَ<span class="text-emerald-700 font-bold">الزُّجَاجُ</span> صَافٍ.
-        </div>
-        <div class="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl">
-          <strong>Artinya:</strong> "Kelas sangat bersih. Di dalam kelas ada sapu dan tempat sampah. Di atas rak ada buku-buku, dan kaca jendela tampak bening."
-        </div>
+        ${extraStory.paragraphs.map(paragraph => `
+          <div>
+            <div class="font-arabic text-2xl text-slate-800 text-right leading-loose" dir="rtl">${renderHighlightedStorySentence(paragraph)}</div>
+            <p class="text-sm text-slate-600 bg-slate-50 p-3 rounded-xl">${paragraph.meaning}</p>
+          </div>
+        `).join('')}
       </div>
     </div>
   `;
 
   storyContainer.innerHTML = html;
+  storyContainer.addEventListener('click', event => {
+    const wordButton = event.target.closest('[data-story-word]');
+    if (wordButton) {
+      const paragraph = mainStory.paragraphs[Number(wordButton.getAttribute('data-story-paragraph'))];
+      const word = paragraph?.words[Number(wordButton.getAttribute('data-story-word'))];
+      if (word) showWordDetail(word.ar, word.id, word.type || '', wordButton);
+      return;
+    }
+
+    const audioButton = event.target.closest('[data-story-audio]');
+    if (audioButton) {
+      const paragraph = mainStory.paragraphs[Number(audioButton.getAttribute('data-story-audio'))];
+      if (paragraph?.sentence_ar) playArabicSpeech(paragraph.sentence_ar);
+      return;
+    }
+
+    const actionButton = event.target.closest('[data-story-action]');
+    if (actionButton?.getAttribute('data-story-action') === 'full-audio') playFullStoryAudio();
+    if (actionButton?.getAttribute('data-story-action') === 'extra-audio') playArabicSpeech(getStoryAudioText(extraStory));
+  });
 }
 
-function showWordDetail(arabic, translation, type) {
+function renderHighlightedStorySentence(paragraph) {
+  let sentence = paragraph.sentence_ar;
+  paragraph.words.filter(word => word.type).forEach(word => {
+    const colorClass = word.type === 'alat_tulis' ? 'text-amber-700' : 'text-emerald-700';
+    sentence = sentence.split(word.ar).join(`<span class="${colorClass} font-bold">${word.ar}</span>`);
+  });
+  return sentence;
+}
+
+function showWordDetail(arabic, translation, type, trigger = document.activeElement) {
   playArabicSpeech(arabic);
 
-  const typeDesc = type === 'alat_tulis' 
-    ? '✏️ Termasuk kategori: Alat Tulis & Peralatan Sekolah' 
+  const typeDesc = type === 'alat_tulis'
+    ? '✏️ Termasuk kategori: Alat Tulis & Peralatan Sekolah'
     : (type === 'benda_kelas' ? '🏫 Termasuk kategori: Benda di Dalam Kelas' : 'Kata penghubung / keterangan');
 
   const popup = document.getElementById('word-detail-modal');
@@ -682,22 +822,39 @@ function showWordDetail(arabic, translation, type) {
     document.getElementById('modal-word-arabic').textContent = arabic;
     document.getElementById('modal-word-trans').textContent = translation;
     document.getElementById('modal-word-type').textContent = typeDesc;
-    popup.classList.remove('hidden');
-    popup.classList.add('flex');
+    openAppDialog(popup, trigger);
   }
 }
 
 function closeWordModal() {
   const popup = document.getElementById('word-detail-modal');
-  if (popup) {
-    popup.classList.add('hidden');
-    popup.classList.remove('flex');
-  }
+  if (popup?.open) popup.close();
+}
+
+const dialogReturnFocus = new WeakMap();
+
+function openAppDialog(dialog, returnFocus = document.activeElement) {
+  if (!dialog || dialog.open || typeof dialog.showModal !== 'function') return;
+  dialogReturnFocus.set(dialog, returnFocus);
+  dialog.addEventListener('close', () => {
+    const target = dialogReturnFocus.get(dialog);
+    const visible = target?.isConnected && !target.closest('.hidden,[hidden]');
+    if (visible) target.focus();
+  }, { once: true });
+  dialog.showModal();
+  (dialog.querySelector('[data-dialog-initial-focus]') || dialog.querySelector('button'))?.focus();
 }
 
 function playFullStoryAudio() {
-  const fullStory = "هٰذَا فَصْلِيْ. فِي الْفَصْلِ مَكْتَبٌ وَكُرْسِيٌّ وَسَبُّوْرَةٌ. عَلَى الْجِدَارِ سَاعَةٌ وَمِصْبَاحٌ. فِيْ حَقِيْبَتِيْ دَفْتَرٌ وَقَلَمٌ وَقَلَمُ الرَّصَاصِ وَمِسْطَرَةٌ.";
-  playArabicSpeech(fullStory);
+  const fullStory = getStoryAudioText(ARABIC_DATA.reading_materials[0]);
+  if (fullStory) playArabicSpeech(fullStory);
+}
+
+function getStoryAudioText(story) {
+  return story.paragraphs
+    .map(paragraph => paragraph.sentence_ar)
+    .filter(Boolean)
+    .join(' ');
 }
 
 // ==========================================
@@ -711,9 +868,10 @@ function initKitabahTab() {
   const undoBtn = document.getElementById('canvas-undo-btn');
   const eraserBtn = document.getElementById('canvas-eraser-btn');
   const toggleGuideBtn = document.getElementById('canvas-guide-btn');
+  const toggleTracingBtn = document.getElementById('canvas-tracing-btn');
   const downloadBtn = document.getElementById('canvas-download-btn');
 
-  // Populate word selector with all 22 vocabularies
+  // Populate the word selector from the vocabulary data source.
   if (wordSelect) {
     wordSelect.innerHTML = ARABIC_DATA.vocabularies.map(v => `
       <option value="${v.arabic}">${v.arabic} (${v.latin} - ${v.meaning})</option>
@@ -729,8 +887,12 @@ function initKitabahTab() {
   // Drawing colors
   colorButtons.forEach(btn => {
     btn.addEventListener('click', () => {
-      colorButtons.forEach(b => b.classList.remove('ring-4', 'ring-emerald-300'));
+      colorButtons.forEach(b => {
+        b.classList.remove('ring-4', 'ring-emerald-300');
+        b.setAttribute('aria-pressed', 'false');
+      });
       btn.classList.add('ring-4', 'ring-emerald-300');
+      btn.setAttribute('aria-pressed', 'true');
       const color = btn.getAttribute('data-draw-color');
       if (appState.pad) appState.pad.setColor(color);
     });
@@ -740,7 +902,9 @@ function initKitabahTab() {
   sizeButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       sizeButtons.forEach(b => b.classList.remove('bg-emerald-600', 'text-white'));
+      sizeButtons.forEach(b => b.setAttribute('aria-pressed', 'false'));
       btn.classList.add('bg-emerald-600', 'text-white');
+      btn.setAttribute('aria-pressed', 'true');
       const size = parseInt(btn.getAttribute('data-draw-size'), 10);
       if (appState.pad) appState.pad.setSize(size);
     });
@@ -753,6 +917,7 @@ function initKitabahTab() {
       if (!appState.pad) return;
       const isNowEraser = !appState.pad.isEraser;
       appState.pad.setEraser(isNowEraser);
+      eraserBtn.setAttribute('aria-pressed', String(isNowEraser));
       if (isNowEraser) {
         eraserBtn.classList.add('bg-amber-600', 'text-white');
       } else {
@@ -760,7 +925,16 @@ function initKitabahTab() {
       }
     });
   }
-  if (toggleGuideBtn) toggleGuideBtn.addEventListener('click', () => appState.pad && appState.pad.toggleGuideline());
+  if (toggleGuideBtn) toggleGuideBtn.addEventListener('click', () => {
+    if (!appState.pad) return;
+    const visible = appState.pad.toggleGuideline();
+    toggleGuideBtn.setAttribute('aria-pressed', String(visible));
+  });
+  if (toggleTracingBtn) toggleTracingBtn.addEventListener('click', () => {
+    if (!appState.pad) return;
+    const visible = appState.pad.toggleTracing();
+    toggleTracingBtn.setAttribute('aria-pressed', String(visible));
+  });
   if (downloadBtn) downloadBtn.addEventListener('click', () => appState.pad && appState.pad.downloadDrawing());
 
   // Inisialisasi puzzle sambung huruf
@@ -773,6 +947,13 @@ const sambungItems = ARABIC_DATA.question_bank.filter(q => q.type === 'sambung_h
 
 function initSambungHurufInteractive() {
   renderSambungPuzzle();
+  const puzzleContainer = document.getElementById('sambung-puzzle-content');
+  puzzleContainer?.addEventListener('click', event => {
+    const option = event.target.closest('[data-puzzle-option]');
+    if (!option) return;
+    const item = sambungItems[currentPuzzleIndex];
+    checkSambungAnswer(Number(option.getAttribute('data-puzzle-option')), item.correct_answer, item.target_word);
+  });
 
   const nextBtn = document.getElementById('puzzle-next-btn');
   const prevBtn = document.getElementById('puzzle-prev-btn');
@@ -815,8 +996,7 @@ function renderSambungPuzzle() {
       <!-- Pilihan Jawaban Puzzle -->
       <div class="grid grid-cols-2 gap-3 max-w-md mx-auto" id="puzzle-options">
         ${item.options.map((opt, idx) => `
-          <button 
-            onclick="checkSambungAnswer(${idx}, ${item.correct_answer}, '${item.target_word}')"
+          <button type="button" data-puzzle-option="${idx}"
             class="puzzle-opt-btn p-4 rounded-xl border-2 border-slate-200 hover:border-emerald-500 bg-white font-arabic text-2xl font-bold text-slate-800 transition-all text-center">
             ${opt}
           </button>
@@ -865,37 +1045,141 @@ function checkSambungAnswer(chosenIdx, correctIdx, targetWord) {
 // MODUL 4: BANK SOAL & KUIS INTERAKTIF
 // ==========================================
 function initKuisTab() {
-  const filterButtons = document.querySelectorAll('[data-quiz-filter]');
-  filterButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
-      filterButtons.forEach(b => {
-        b.classList.remove('bg-emerald-600', 'text-white', 'shadow');
-        b.classList.add('bg-white', 'text-slate-700', 'border', 'border-slate-200');
-      });
-      btn.classList.remove('bg-white', 'text-slate-700', 'border', 'border-slate-200');
-      btn.classList.add('bg-emerald-600', 'text-white', 'shadow');
-
-      const filterType = btn.getAttribute('data-quiz-filter');
-      loadQuizQuestions(filterType);
+  const filters = document.getElementById('quiz-filter-buttons');
+  const resetButton = document.getElementById('quiz-reset-btn');
+  if (filters) {
+    renderQuizFilters(filters);
+    filters.addEventListener('click', event => {
+      const button = event.target.closest('[data-quiz-filter]');
+      if (button) loadQuizQuestions(button.getAttribute('data-quiz-filter'));
     });
+  }
+  document.getElementById('quiz-questions-list')?.addEventListener('click', event => {
+    const button = event.target.closest('[data-quiz-question][data-quiz-option]');
+    if (button) selectQuizAnswer(button.getAttribute('data-quiz-question'), Number(button.getAttribute('data-quiz-option')));
   });
+  if (resetButton) {
+    resetButton.addEventListener('click', resetCurrentQuizCategory);
+  }
+
+  appState.quizProgress = readQuizProgress();
+  migrateLegacyQuizAnswers();
+  const savedFilter = safeStorageGet(QUIZ_FILTER_STORAGE_KEY);
+  appState.quizFilterType = savedFilter === 'all' || QUESTION_TYPE_META[savedFilter] ? savedFilter : 'all';
+  loadQuizQuestions(appState.quizFilterType);
+}
+
+function renderQuizFilters(container) {
+  const filters = [
+    { type: 'all', label: 'Semua Soal', count: ARABIC_DATA.question_bank.length },
+    ...Object.entries(QUESTION_TYPE_META).map(([type, meta]) => ({
+      type,
+      label: meta.filterLabel,
+      count: ARABIC_DATA.question_bank.filter(question => question.type === type).length
+    }))
+  ];
+  container.innerHTML = filters.map(filter => `
+    <button type="button" data-quiz-filter="${filter.type}" aria-pressed="false" class="quiz-filter-button min-h-11 px-3 rounded-xl text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all">
+      ${filter.label} <span class="font-medium">(${filter.count})</span>
+    </button>
+  `).join('');
+}
+
+function readQuizProgress() {
+  const serialized = safeStorageGet(QUIZ_PROGRESS_STORAGE_KEY);
+  if (!serialized) return {};
+  try {
+    const parsed = JSON.parse(serialized);
+    if (parsed?.version === 1 && parsed.answersByFilter && typeof parsed.answersByFilter === 'object') {
+      return parsed.answersByFilter;
+    }
+  } catch (error) {
+    safeStorageRemove(QUIZ_PROGRESS_STORAGE_KEY);
+  }
+  return {};
+}
+
+function migrateLegacyQuizAnswers() {
+  const serialized = safeStorageGet(LEGACY_QUIZ_ANSWERS_STORAGE_KEY);
+  if (!serialized) return;
+  try {
+    const legacyAnswers = JSON.parse(serialized);
+    if (!legacyAnswers || typeof legacyAnswers !== 'object' || Array.isArray(legacyAnswers)) return;
+    const knownQuestions = new Map(ARABIC_DATA.question_bank.map(question => [question.id, question]));
+    const validAnswers = {};
+    Object.entries(legacyAnswers).forEach(([id, rawAnswer]) => {
+      const question = knownQuestions.get(id);
+      const answer = Number(rawAnswer);
+      if (question && Number.isInteger(answer) && answer >= 0 && answer < question.options.length) {
+        validAnswers[id] = answer;
+      }
+    });
+    const currentAllAnswers = appState.quizProgress.all && typeof appState.quizProgress.all === 'object' && !Array.isArray(appState.quizProgress.all)
+      ? appState.quizProgress.all
+      : {};
+    appState.quizProgress.all = { ...validAnswers, ...currentAllAnswers };
+    if (safeStorageSet(QUIZ_PROGRESS_STORAGE_KEY, JSON.stringify({ version: 1, answersByFilter: appState.quizProgress }))) {
+      safeStorageRemove(LEGACY_QUIZ_ANSWERS_STORAGE_KEY);
+    }
+  } catch (error) {
+    // Data kuis lama yang rusak diabaikan; latihan baru tetap bisa dimulai.
+  }
+}
+
+function saveQuizProgress() {
+  appState.quizProgress[appState.quizFilterType] = { ...appState.quizAnswers };
+  safeStorageSet(QUIZ_PROGRESS_STORAGE_KEY, JSON.stringify({
+    version: 1,
+    answersByFilter: appState.quizProgress
+  }));
+}
+
+function getSavedQuizAnswers(filterType) {
+  const saved = appState.quizProgress[filterType];
+  if (!saved || typeof saved !== 'object') return {};
+  const allowedQuestions = new Map(ARABIC_DATA.question_bank.map(question => [question.id, question]));
+  const answers = {};
+  Object.entries(saved).forEach(([id, rawAnswer]) => {
+    const question = allowedQuestions.get(id);
+    const answer = Number(rawAnswer);
+    const matchesFilter = filterType === 'all' || question?.type === filterType;
+    if (question && matchesFilter && Number.isInteger(answer) && answer >= 0 && answer < question.options.length) {
+      answers[id] = answer;
+    }
+  });
+  return answers;
+}
+
+function resetCurrentQuizCategory() {
+  delete appState.quizProgress[appState.quizFilterType];
+  safeStorageSet(QUIZ_PROGRESS_STORAGE_KEY, JSON.stringify({ version: 1, answersByFilter: appState.quizProgress }));
+  loadQuizQuestions(appState.quizFilterType);
 }
 
 function loadQuizQuestions(filterType = 'all') {
+  if (filterType !== 'all' && !QUESTION_TYPE_META[filterType]) filterType = 'all';
   appState.quizFilterType = filterType;
-  appState.quizSubmitted = false;
-  appState.quizScore = 0;
-
-  try {
-    localStorage.setItem('arab3_quiz_filter', filterType);
-  } catch (e) {}
+  appState.quizAnswers = {};
+  safeStorageSet(QUIZ_FILTER_STORAGE_KEY, filterType);
 
   if (filterType === 'all') {
     appState.quizQuestions = [...ARABIC_DATA.question_bank];
   } else {
     appState.quizQuestions = ARABIC_DATA.question_bank.filter(q => q.type === filterType);
   }
+  appState.quizAnswers = getSavedQuizAnswers(filterType);
 
+  document.querySelectorAll('[data-quiz-filter]').forEach(button => {
+    const selected = button.getAttribute('data-quiz-filter') === filterType;
+    button.setAttribute('aria-pressed', String(selected));
+    button.classList.toggle('bg-emerald-600', selected);
+    button.classList.toggle('text-white', selected);
+    button.classList.toggle('shadow', selected);
+    button.classList.toggle('bg-white', !selected);
+    button.classList.toggle('text-slate-700', !selected);
+  });
+  const resetButton = document.getElementById('quiz-reset-btn');
+  if (resetButton) resetButton.disabled = appState.quizQuestions.length === 0;
   renderQuizList();
   updateLiveScore();
 }
@@ -918,16 +1202,10 @@ function renderQuizList() {
   }
 
   container.innerHTML = questions.map((q, idx) => {
-    let typeBadge = '';
-    if (q.type === 'teks_cerita') {
-      typeBadge = '<span class="px-2.5 py-0.5 bg-blue-100 text-blue-800 text-xs font-bold rounded-full border border-blue-200">📖 Pemahaman Teks Cerita</span>';
-    } else if (q.type === 'sambung_huruf') {
-      typeBadge = '<span class="px-2.5 py-0.5 bg-amber-100 text-amber-800 text-xs font-bold rounded-full border border-amber-200">✍️ Maharatul Kitabah</span>';
-    } else if (q.type === 'ikmal_huruf') {
-      typeBadge = '<span class="px-2.5 py-0.5 bg-purple-100 text-purple-800 text-xs font-bold rounded-full border border-purple-200">🔤 Lengkapi Huruf</span>';
-    } else {
-      typeBadge = '<span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full border border-emerald-200">🎯 Pilihan Ganda</span>';
-    }
+    const typeMeta = QUESTION_TYPE_META[q.type];
+    const typeBadge = typeMeta
+      ? `<span class="px-2.5 py-1 ${typeMeta.badgeClass} text-sm font-bold rounded-full border">${typeMeta.badgeLabel}</span>`
+      : '<span class="px-2.5 py-1 bg-red-100 text-red-800 text-sm font-bold rounded-full border border-red-200">Tipe soal belum dikenali</span>';
 
     const answered = appState.quizAnswers[q.id];
     const hasAnswered = answered !== undefined;
@@ -962,38 +1240,17 @@ function renderQuizList() {
 
         <!-- Pilihan Ganda -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-          ${q.options.map((opt, optIdx) => {
-            let optClasses = 'quiz-option-btn text-left p-3.5 rounded-xl border-2 border-slate-200 font-medium text-slate-700 flex items-center gap-3 transition-all';
-            let badgeClasses = 'w-6 h-6 rounded-lg bg-slate-100 text-slate-600 text-xs font-bold flex items-center justify-center shrink-0';
-
-            if (hasAnswered) {
-              if (answered === optIdx && optIdx === q.correct_answer) {
-                optClasses = 'quiz-option-btn text-left p-3.5 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 font-bold flex items-center gap-3';
-                badgeClasses = 'w-6 h-6 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0';
-              } else if (answered === optIdx && optIdx !== q.correct_answer) {
-                optClasses = 'quiz-option-btn text-left p-3.5 rounded-xl border-2 border-red-500 bg-red-50 text-red-900 font-medium flex items-center gap-3';
-                badgeClasses = 'w-6 h-6 rounded-lg bg-red-600 text-white text-xs font-bold flex items-center justify-center shrink-0';
-              } else if (optIdx === q.correct_answer) {
-                optClasses = 'quiz-option-btn text-left p-3.5 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 font-bold flex items-center gap-3';
-                badgeClasses = 'w-6 h-6 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0';
-              }
-            } else {
-              optClasses += ' hover:border-emerald-400 hover:bg-emerald-50/50 cursor-pointer';
-            }
-
-            return `
-              <button 
-                id="opt-btn-${q.id}-${optIdx}"
-                ${hasAnswered ? 'disabled' : ''}
-                onclick="selectQuizAnswer('${q.id}', ${optIdx})"
-                class="${optClasses}">
-                <span class="${badgeClasses}">
-                  ${['A', 'B', 'C', 'D'][optIdx]}
-                </span>
-                <span class="${opt.match(/[\u0600-\u06FF]/) ? 'font-arabic text-xl font-bold' : 'text-sm'}">${opt}</span>
-              </button>
-            `;
-          }).join('')}
+          ${q.options.map((opt, optIdx) => `
+            <button type="button" aria-pressed="false"
+              id="opt-btn-${q.id}-${optIdx}"
+              data-quiz-question="${q.id}" data-quiz-option="${optIdx}"
+              class="quiz-option-btn text-left p-3.5 rounded-xl border-2 border-slate-200 hover:border-emerald-400 hover:bg-emerald-50/50 transition-all font-medium text-slate-700 flex items-center gap-3">
+              <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-600 text-xs font-bold flex items-center justify-center shrink-0">
+                ${['A', 'B', 'C', 'D'][optIdx]}
+              </span>
+              <span class="${opt.match(/[\u0600-\u06FF]/) ? 'font-arabic text-xl font-bold' : 'text-sm'}">${opt}</span>
+            </button>
+          `).join('')}
         </div>
 
         <!-- Pembahasan -->
@@ -1008,42 +1265,50 @@ function renderQuizList() {
     `;
   }).join('');
 
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
+  questions.forEach(question => {
+    const selectedAnswer = appState.quizAnswers[question.id];
+    if (!Number.isInteger(selectedAnswer)) return;
+    applyQuizAnswerFeedback(question, selectedAnswer);
+    document.getElementById(`explanation-${question.id}`)?.classList.remove('hidden');
+  });
+
+  refreshIcons();
+  updateLiveScore(false);
 }
 
 function selectQuizAnswer(questionId, selectedOptIdx) {
   const q = appState.quizQuestions.find(item => item.id === questionId);
-  if (!q) return;
+  if (!q || !Number.isInteger(selectedOptIdx) || selectedOptIdx < 0 || selectedOptIdx >= q.options.length) return;
 
   if (appState.quizAnswers[questionId] !== undefined) return;
 
   appState.quizAnswers[questionId] = selectedOptIdx;
+  saveQuizProgress();
+  applyQuizAnswerFeedback(q, selectedOptIdx);
+  playSoundEffect(selectedOptIdx === q.correct_answer ? 'correct' : 'wrong');
+  document.getElementById(`explanation-${questionId}`)?.classList.remove('hidden');
+  updateLiveScore(true);
+}
 
-  try {
-    localStorage.setItem('arab3_quiz_answers', JSON.stringify(appState.quizAnswers));
-  } catch (e) {}
-
-  const isCorrect = selectedOptIdx === q.correct_answer;
-  const chosenBtn = document.getElementById(`opt-btn-${questionId}-${selectedOptIdx}`);
-  const correctBtn = document.getElementById(`opt-btn-${questionId}-${q.correct_answer}`);
-  const expBox = document.getElementById(`explanation-${questionId}`);
-
-  q.options.forEach((_, idx) => {
-    const btn = document.getElementById(`opt-btn-${questionId}-${idx}`);
-    if (btn) btn.disabled = true;
+function applyQuizAnswerFeedback(question, selectedOptIdx) {
+  const isCorrect = selectedOptIdx === question.correct_answer;
+  const chosenBtn = document.getElementById(`opt-btn-${question.id}-${selectedOptIdx}`);
+  const correctBtn = document.getElementById(`opt-btn-${question.id}-${question.correct_answer}`);
+  question.options.forEach((_, idx) => {
+    const btn = document.getElementById(`opt-btn-${question.id}-${idx}`);
+    if (btn) {
+      btn.disabled = true;
+      btn.setAttribute('aria-pressed', String(idx === selectedOptIdx));
+    }
   });
 
   if (isCorrect) {
-    playSoundEffect('correct');
     if (chosenBtn) {
       chosenBtn.className = 'quiz-option-btn text-left p-3.5 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 font-bold flex items-center gap-3';
       const badge = chosenBtn.querySelector('span');
       if (badge) badge.className = 'w-6 h-6 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0';
     }
   } else {
-    playSoundEffect('wrong');
     if (chosenBtn) {
       chosenBtn.className = 'quiz-option-btn text-left p-3.5 rounded-xl border-2 border-red-500 bg-red-50 text-red-900 font-medium flex items-center gap-3';
       const badge = chosenBtn.querySelector('span');
@@ -1055,15 +1320,9 @@ function selectQuizAnswer(questionId, selectedOptIdx) {
       if (badge) badge.className = 'w-6 h-6 rounded-lg bg-emerald-600 text-white text-xs font-bold flex items-center justify-center shrink-0';
     }
   }
-
-  if (expBox) {
-    expBox.classList.remove('hidden');
-  }
-
-  updateLiveScore();
 }
 
-function updateLiveScore() {
+function updateLiveScore(allowConfetti = false) {
   const totalAnswered = Object.keys(appState.quizAnswers).length;
   let correctCount = 0;
 
@@ -1084,10 +1343,11 @@ function updateLiveScore() {
     liveScoreDisplay.textContent = `Benar: ${correctCount} / ${currentListAnswered}`;
   }
 
-  if (currentListAnswered === currentList.length && currentListAnswered > 0) {
-    const percentage = Math.round((correctCount / currentListAnswered) * 100);
-    if (percentage >= 70 && window.confetti) {
-      window.confetti({
+  // Jika semua sudah terjawab, berikan konfeti
+  if (allowConfetti && totalAnswered === appState.quizQuestions.length && totalAnswered > 0) {
+    const percentage = Math.round((correctCount / totalAnswered) * 100);
+    if (percentage >= 70) {
+      playConfetti({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 }
@@ -1108,104 +1368,202 @@ function initAsesmenTab() {
   }
 
   const submitBtn = document.getElementById('submit-exam-btn');
+  const submitDialog = document.getElementById('exam-submit-modal');
   if (submitBtn) {
-    submitBtn.addEventListener('click', () => {
-      openExamConfirmModal();
-    });
+    submitBtn.addEventListener('click', () => openAppDialog(submitDialog, submitBtn));
   }
 
-  if (appState.hasActiveExamSession) {
-    showResumeExamOption();
-  }
+  document.getElementById('cancel-exam-submit-btn')?.addEventListener('click', () => submitDialog?.close());
+  document.getElementById('confirm-exam-submit-btn')?.addEventListener('click', () => {
+    dialogReturnFocus.set(submitDialog, document.getElementById('exam-result-heading'));
+    submitDialog?.close();
+    finishExamSimulation();
+  });
+  document.getElementById('word-modal-speech-btn')?.addEventListener('click', () => {
+    playArabicSpeech(document.getElementById('modal-word-arabic').textContent);
+  });
+  document.getElementById('word-modal-close-btn')?.addEventListener('click', closeWordModal);
+
+  document.getElementById('finish-exam-btn')?.addEventListener('click', () => submitBtn?.click());
+  document.getElementById('print-exam-btn')?.addEventListener('click', () => switchTab('cetak'));
+  document.getElementById('exam-questions-container')?.addEventListener('change', event => {
+    const answer = event.target.closest('input[data-exam-question]');
+    if (answer) recordExamAnswer(answer.getAttribute('data-exam-question'), Number(answer.value));
+  });
+  document.getElementById('exam-config-count').textContent = `${EXAM_CONFIG.questionCount} Butir`;
+  document.getElementById('exam-config-duration').textContent = `${EXAM_CONFIG.durationMinutes} Menit`;
+  document.addEventListener('visibilitychange', updateExamTimer);
+
+  const retryBtn = document.getElementById('retry-exam-btn');
+  if (retryBtn) retryBtn.addEventListener('click', startExamSimulation);
+  return restoreActiveExamSession();
 }
 
-function showResumeExamOption() {
-  const introBox = document.getElementById('exam-intro-box');
-  if (!introBox) return;
-
-  const existingResume = document.getElementById('exam-resume-banner');
-  if (existingResume) existingResume.remove();
-
-  const mins = Math.floor(appState.examSecondsRemaining / 60);
-  const secs = appState.examSecondsRemaining % 60;
-  const answeredCount = Object.keys(appState.examAnswers).length;
-
-  const banner = document.createElement('div');
-  banner.id = 'exam-resume-banner';
-  banner.className = 'p-4 bg-emerald-50 border-2 border-emerald-500 rounded-2xl mb-4 text-left flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm';
-  banner.innerHTML = `
-    <div>
-      <div class="font-bold text-emerald-900 text-sm flex items-center gap-1.5">
-        <span>⏱️ Sesi Ujian Berlangsung Tersimpan</span>
-      </div>
-      <p class="text-xs text-emerald-800 mt-0.5">
-        Terjawab <strong>${answeredCount} dari 15 soal</strong> • Sisa waktu: <strong>${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}</strong>
-      </p>
-    </div>
-    <div class="flex items-center gap-2">
-      <button onclick="resumeExamSimulation()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition-all">
-        Lanjutkan Ujian
-      </button>
-      <button onclick="discardAndRestartExam()" class="px-3 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-bold text-xs rounded-xl transition-all">
-        Ulangi Baru
-      </button>
-    </div>
-  `;
-
-  introBox.insertBefore(banner, introBox.firstChild);
-}
-
-function resumeExamSimulation() {
-  document.getElementById('exam-intro-box').classList.add('hidden');
-  document.getElementById('exam-active-box').classList.remove('hidden');
-  document.getElementById('exam-result-box').classList.add('hidden');
-
-  renderExamQuestions();
-  startExamTimer();
-
-  const answeredCount = Object.keys(appState.examAnswers).length;
-  const progressText = document.getElementById('exam-progress-text');
-  if (progressText) {
-    progressText.textContent = `Terjawab: ${answeredCount} / ${appState.examQuestions.length}`;
-  }
-}
-
-function discardAndRestartExam() {
-  try {
-    localStorage.removeItem('arab3_exam_state');
-  } catch (e) {}
-  appState.hasActiveExamSession = false;
-  appState.examQuestions = [];
-  appState.examAnswers = {};
-  const banner = document.getElementById('exam-resume-banner');
-  if (banner) banner.remove();
-  startExamSimulation();
+function renderStudyCounts() {
+  const vocabCount = ARABIC_DATA.vocabularies.length;
+  const questionCount = ARABIC_DATA.question_bank.length;
+  const writingCount = ARABIC_DATA.vocabularies.filter(item => item.category === 'alat_tulis').length;
+  const classroomCount = ARABIC_DATA.vocabularies.filter(item => item.category === 'benda_kelas').length;
+  const values = {
+    'hero-vocab-count': vocabCount,
+    'hero-vocab-copy-count': vocabCount,
+    'hero-question-count': questionCount,
+    'hero-exam-count': EXAM_CONFIG.questionCount,
+    'hero-exam-duration': `${EXAM_CONFIG.durationMinutes} menit`,
+    'hero-writing-vocab-count': `${writingCount} Alat Tulis & Sekolah`,
+    'hero-class-vocab-count': `${classroomCount} Benda di Dalam Kelas`,
+    'vocab-count-all': vocabCount,
+    'vocab-count-writing': writingCount,
+    'vocab-count-classroom': classroomCount
+  };
+  Object.entries(values).forEach(([id, value]) => {
+    const element = document.getElementById(id);
+    if (element) element.textContent = value;
+  });
 }
 
 function startExamSimulation() {
-  const shuffled = [...ARABIC_DATA.question_bank].sort(() => 0.5 - Math.random());
-  appState.examQuestions = shuffled.slice(0, 15);
+  appState.examQuestions = createExamQuestionSet();
   appState.examAnswers = {};
   appState.examSubmitted = false;
-  appState.examSecondsRemaining = 30 * 60; // 30 Menit
+  appState.examStartedAt = Date.now();
+  appState.examEndsAt = appState.examStartedAt + EXAM_CONFIG.durationMinutes * 60 * 1000;
+  saveActiveExamSession();
 
-  document.getElementById('exam-intro-box').classList.add('hidden');
-  document.getElementById('exam-active-box').classList.remove('hidden');
-  document.getElementById('exam-result-box').classList.add('hidden');
-
-  renderExamQuestions();
+  showActiveExam();
   startExamTimer();
-  saveExamStateToStorage();
+}
+
+function createExamQuestionSet(random = Math.random) {
+  const selected = [];
+  Object.entries(EXAM_CONFIG.composition).forEach(([type, count]) => {
+    const candidates = ARABIC_DATA.question_bank.filter(question => question.type === type);
+    if (candidates.length < count) {
+      throw new Error(`Bank soal ${type} hanya memiliki ${candidates.length} butir; dibutuhkan ${count}.`);
+    }
+    selected.push(...fisherYatesShuffle(candidates, random).slice(0, count));
+  });
+  if (selected.length !== EXAM_CONFIG.questionCount) {
+    throw new Error(`Blueprint ujian menghasilkan ${selected.length} soal, bukan ${EXAM_CONFIG.questionCount}.`);
+  }
+  return fisherYatesShuffle(selected, random);
+}
+
+function fisherYatesShuffle(items, random = Math.random) {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index--) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
+}
+
+function saveActiveExamSession() {
+  if (!appState.examEndsAt || appState.examSubmitted || appState.examQuestions.length === 0) return;
+  safeStorageSet(EXAM_STORAGE_KEY, JSON.stringify({
+    version: 1,
+    startedAt: appState.examStartedAt,
+    endsAt: appState.examEndsAt,
+    questionIds: appState.examQuestions.map(question => question.id),
+    answers: appState.examAnswers
+  }));
+}
+
+function normalizeSavedExamState(savedState) {
+  if (!savedState || typeof savedState !== 'object' || savedState.submitted === true || savedState.examSubmitted === true) return null;
+  const questionIds = Array.isArray(savedState.questionIds)
+    ? savedState.questionIds
+    : Array.isArray(savedState.examQuestions)
+      ? savedState.examQuestions.map(question => typeof question === 'string' ? question : question?.id)
+      : Array.isArray(savedState.questions)
+        ? savedState.questions.map(question => typeof question === 'string' ? question : question?.id)
+        : [];
+  const knownQuestions = new Map(ARABIC_DATA.question_bank.map(question => [question.id, question]));
+  if (questionIds.length !== EXAM_CONFIG.questionCount || new Set(questionIds).size !== questionIds.length) return null;
+  if (questionIds.some(id => typeof id !== 'string' || !knownQuestions.has(id))) return null;
+
+  const now = Date.now();
+  let endsAt = savedState.endsAt === null || savedState.endsAt === '' ? NaN : Number(savedState.endsAt);
+  const legacySecondsValue = savedState.secondsRemaining ?? savedState.examSecondsRemaining;
+  const legacySeconds = legacySecondsValue === null || legacySecondsValue === '' ? NaN : Number(legacySecondsValue);
+  if (!Number.isFinite(endsAt)) {
+    if (Number.isFinite(legacySeconds) && legacySeconds >= 0) {
+      endsAt = now + Math.ceil(legacySeconds) * 1000;
+    } else if (savedState.startedAt !== null && savedState.startedAt !== '' && Number.isFinite(Number(savedState.startedAt))) {
+      endsAt = Number(savedState.startedAt) + EXAM_CONFIG.durationMinutes * 60 * 1000;
+    } else {
+      return null;
+    }
+  }
+
+  const sourceAnswers = savedState.answers && typeof savedState.answers === 'object'
+    ? savedState.answers
+    : savedState.examAnswers && typeof savedState.examAnswers === 'object'
+      ? savedState.examAnswers
+      : {};
+  const answers = {};
+  questionIds.forEach(id => {
+    const rawValue = sourceAnswers[id];
+    if (rawValue === null || rawValue === undefined || rawValue === '' || typeof rawValue === 'boolean') return;
+    const value = Number(rawValue);
+    if (Number.isInteger(value) && value >= 0 && value < knownQuestions.get(id).options.length) {
+      answers[id] = value;
+    }
+  });
+
+  const startedAt = savedState.startedAt !== null && savedState.startedAt !== '' && Number.isFinite(Number(savedState.startedAt))
+    ? Number(savedState.startedAt)
+    : endsAt - EXAM_CONFIG.durationMinutes * 60 * 1000;
+  return {
+    startedAt,
+    endsAt,
+    questions: questionIds.map(id => knownQuestions.get(id)),
+    answers
+  };
+}
+
+function restoreActiveExamSession() {
+  const serialized = safeStorageGet(EXAM_STORAGE_KEY);
+  if (!serialized) return false;
+
+  let savedState;
+  try {
+    savedState = JSON.parse(serialized);
+  } catch (error) {
+    safeStorageRemove(EXAM_STORAGE_KEY);
+    return false;
+  }
+
+  const restored = normalizeSavedExamState(savedState);
+  if (!restored) {
+    safeStorageRemove(EXAM_STORAGE_KEY);
+    return false;
+  }
+
+  appState.examQuestions = restored.questions;
+  appState.examAnswers = restored.answers;
+  appState.examStartedAt = restored.startedAt;
+  appState.examEndsAt = restored.endsAt;
+  appState.examSubmitted = false;
+  saveActiveExamSession();
+  showActiveExam();
+  startExamTimer();
+  return true;
+}
+
+function showActiveExam() {
+  document.getElementById('exam-intro-box')?.classList.add('hidden');
+  document.getElementById('exam-active-box')?.classList.remove('hidden');
+  document.getElementById('exam-result-box')?.classList.add('hidden');
+  renderExamQuestions();
+  updateExamProgress();
 }
 
 function renderExamQuestions() {
   const container = document.getElementById('exam-questions-container');
   if (!container) return;
 
-  container.innerHTML = appState.examQuestions.map((q, idx) => {
-    const selectedAnswer = appState.examAnswers[q.id];
-
-    return `
+  container.innerHTML = appState.examQuestions.map((q, idx) => `
       <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
         <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
           <span class="text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-md">
@@ -1220,125 +1578,74 @@ function renderExamQuestions() {
           </div>
         ` : ''}
 
-        <div class="text-sm font-bold text-slate-800 mb-4">${q.question}</div>
-
-        <div class="space-y-2">
-          ${q.options.map((opt, optIdx) => `
-            <label class="flex items-center gap-3 p-3 rounded-xl border ${selectedAnswer === optIdx ? 'border-emerald-500 bg-emerald-50/50 font-bold' : 'border-slate-200'} hover:bg-slate-50 cursor-pointer transition-colors">
-              <input 
-                type="radio" 
-                name="exam-q-${q.id}" 
-                value="${optIdx}" 
-                ${selectedAnswer === optIdx ? 'checked' : ''}
-                onchange="recordExamAnswer('${q.id}', ${optIdx})"
-                class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-slate-300">
-              <span class="${opt.match(/[\u0600-\u06FF]/) ? 'font-arabic text-xl font-bold' : 'text-sm font-medium text-slate-700'}">${opt}</span>
-            </label>
-          `).join('')}
-        </div>
-      </div>
-    `;
-  }).join('');
+      <fieldset class="space-y-2">
+        <legend class="text-base font-bold text-slate-800 mb-4">${q.question}</legend>
+        ${q.options.map((opt, optIdx) => `
+          <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+            <input
+              type="radio"
+              name="exam-q-${q.id}"
+              value="${optIdx}"
+              data-exam-question="${q.id}"
+              ${appState.examAnswers[q.id] === optIdx ? 'checked' : ''}
+              class="w-4 h-4 text-emerald-600 focus:ring-emerald-500 border-slate-300">
+            <span class="${opt.match(/[\u0600-\u06FF]/) ? 'font-arabic text-xl font-bold' : 'text-sm font-medium text-slate-700'}">${opt}</span>
+          </label>
+        `).join('')}
+      </fieldset>
+    </div>
+  `).join('');
 }
 
 function recordExamAnswer(questionId, optionIdx) {
+  if (appState.examSubmitted) return;
+  const question = appState.examQuestions.find(item => item.id === questionId);
+  if (!question || !Number.isInteger(optionIdx) || optionIdx < 0 || optionIdx >= question.options.length) return;
   appState.examAnswers[questionId] = optionIdx;
-  saveExamStateToStorage();
+  saveActiveExamSession();
+  updateExamProgress();
+}
 
+function updateExamProgress() {
   const answeredCount = Object.keys(appState.examAnswers).length;
   const progressText = document.getElementById('exam-progress-text');
   if (progressText) {
-    progressText.textContent = `Terjawab: ${answeredCount} / ${appState.examQuestions.length}`;
+    progressText.textContent = `Terjawab: ${answeredCount} / ${EXAM_CONFIG.questionCount}`;
   }
-}
-
-function saveExamStateToStorage() {
-  try {
-    localStorage.setItem('arab3_exam_state', JSON.stringify({
-      questions: appState.examQuestions,
-      answers: appState.examAnswers,
-      secondsRemaining: appState.examSecondsRemaining,
-      submitted: appState.examSubmitted
-    }));
-  } catch (e) {}
 }
 
 function startExamTimer() {
   if (appState.examTimerInterval) clearInterval(appState.examTimerInterval);
+  updateExamTimer();
+  if (!appState.examSubmitted && appState.examEndsAt > Date.now()) {
+    appState.examTimerInterval = setInterval(updateExamTimer, 1000);
+  }
+}
 
+function updateExamTimer() {
+  if (appState.examSubmitted || !appState.examEndsAt) return 0;
+  const secondsRemaining = Math.max(0, Math.ceil((appState.examEndsAt - Date.now()) / 1000));
+  const mins = Math.floor(secondsRemaining / 60);
+  const secs = secondsRemaining % 60;
   const timerDisplay = document.getElementById('exam-timer-display');
-
-  appState.examTimerInterval = setInterval(() => {
-    if (appState.examSecondsRemaining <= 0) {
-      clearInterval(appState.examTimerInterval);
-      alert('Waktu ujian telah habis! Jawaban Anda akan otomatis dikumpulkan.');
-      finishExamSimulation();
-      return;
-    }
-
-    appState.examSecondsRemaining--;
-    const mins = Math.floor(appState.examSecondsRemaining / 60);
-    const secs = appState.examSecondsRemaining % 60;
-    if (timerDisplay) {
-      timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    }
-
-    // Simpan waktu ke storage setiap 10 detik
-    if (appState.examSecondsRemaining % 10 === 0) {
-      saveExamStateToStorage();
-    }
-  }, 1000);
+  if (timerDisplay) {
+    timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }
+  if (secondsRemaining === 0) finishExamSimulation({ timedOut: true });
+  return secondsRemaining;
 }
 
-// Modal Konfirmasi Ujian Kustom
-function openExamConfirmModal() {
-  const answeredCount = Object.keys(appState.examAnswers).length;
-  const totalCount = appState.examQuestions.length || 15;
-  const statusEl = document.getElementById('exam-confirm-status');
-  const timeEl = document.getElementById('exam-confirm-time');
-  const modal = document.getElementById('exam-confirm-modal');
-
-  if (statusEl) {
-    if (answeredCount === totalCount) {
-      statusEl.innerHTML = `<span class="text-emerald-600 font-bold">Alhamdulillah! Semua ${totalCount} soal sudah terjawab.</span> Siap untuk dikumpulkan?`;
-    } else {
-      const remaining = totalCount - answeredCount;
-      statusEl.innerHTML = `Kamu sudah menjawab <strong>${answeredCount} dari ${totalCount} soal</strong>.<br><span class="text-amber-600 font-bold">Masih ada ${remaining} soal yang belum dijawab!</span>`;
-    }
+function finishExamSimulation({ timedOut = false } = {}) {
+  if (appState.examSubmitted || appState.examQuestions.length === 0) return;
+  const submitDialog = document.getElementById('exam-submit-modal');
+  if (submitDialog?.open) {
+    dialogReturnFocus.set(submitDialog, document.getElementById('exam-result-heading'));
+    submitDialog.close();
   }
-
-  const mins = Math.floor(appState.examSecondsRemaining / 60);
-  const secs = appState.examSecondsRemaining % 60;
-  if (timeEl) {
-    timeEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  }
-
-  if (modal) {
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-  }
-}
-
-function closeExamConfirmModal() {
-  const modal = document.getElementById('exam-confirm-modal');
-  if (modal) {
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-  }
-}
-
-function confirmSubmitExam() {
-  closeExamConfirmModal();
-  finishExamSimulation();
-}
-
-function finishExamSimulation() {
   if (appState.examTimerInterval) clearInterval(appState.examTimerInterval);
+  appState.examTimerInterval = null;
   appState.examSubmitted = true;
-
-  try {
-    localStorage.removeItem('arab3_exam_state');
-  } catch (e) {}
+  safeStorageRemove(EXAM_STORAGE_KEY);
 
   let correctCount = 0;
   appState.examQuestions.forEach(q => {
@@ -1371,12 +1678,18 @@ function finishExamSimulation() {
 
   document.getElementById('exam-score-number').textContent = score;
   document.getElementById('exam-correct-count').textContent = `${correctCount} dari ${appState.examQuestions.length} Soal Benar`;
+  const resultMessage = document.getElementById('exam-result-message');
+  if (resultMessage) {
+    resultMessage.textContent = timedOut
+      ? 'Waktu habis. Jawaban yang sudah dipilih telah dinilai.'
+      : 'Hasil ini adalah simulasi latihan berdasarkan jawaban yang kamu pilih.';
+  }
   const badge = document.getElementById('exam-predikat-badge');
   badge.textContent = predikat;
   badge.className = `inline-block px-4 py-1.5 rounded-full text-sm font-bold ${predikatColor}`;
 
-  if (score >= 75 && window.confetti) {
-    window.confetti({
+  if (score >= 75) {
+    playConfetti({
       particleCount: 150,
       spread: 90,
       origin: { y: 0.5 }
@@ -1409,53 +1722,7 @@ function finishExamSimulation() {
       `;
     }).join('');
   }
-}
-
-// ==========================================
-// MODAL RESET DATA & MULAI DARI AWAL
-// ==========================================
-function openResetModal() {
-  const modal = document.getElementById('reset-confirm-modal');
-  if (modal) {
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-  }
-}
-
-function closeResetModal() {
-  const modal = document.getElementById('reset-confirm-modal');
-  if (modal) {
-    modal.classList.add('hidden');
-    modal.classList.remove('flex');
-  }
-}
-
-function confirmResetAllData() {
-  try {
-    localStorage.removeItem('arab3_quiz_answers');
-    localStorage.removeItem('arab3_exam_state');
-    localStorage.removeItem('arab3_current_tab');
-  } catch (e) {}
-
-  appState.quizAnswers = {};
-  appState.examAnswers = {};
-  appState.examQuestions = [];
-  appState.hasActiveExamSession = false;
-  if (appState.examTimerInterval) clearInterval(appState.examTimerInterval);
-  appState.examSubmitted = false;
-
-  closeResetModal();
-
-  const resumeBanner = document.getElementById('exam-resume-banner');
-  if (resumeBanner) resumeBanner.remove();
-
-  document.getElementById('exam-intro-box')?.classList.remove('hidden');
-  document.getElementById('exam-active-box')?.classList.add('hidden');
-  document.getElementById('exam-result-box')?.classList.add('hidden');
-
-  renderQuizList();
-  updateLiveScore();
-  switchTab('materi');
+  document.getElementById('exam-result-heading')?.focus();
 }
 
 // ==========================================

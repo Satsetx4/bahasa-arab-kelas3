@@ -19,10 +19,10 @@
   </script>
 
   <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   
   <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://unpkg.com/lucide@1.47.0"></script>
   
   <!-- Canvas Confetti for celebrations -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
@@ -85,14 +85,14 @@
             <i data-lucide="sun" class="w-4 h-4 icon-sun"></i>
           </button>
           <button 
-            onclick="switchTab('cetak')"
-            class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all">
+            id="header-print-btn"
+            class="student-action-button hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-all">
             <i data-lucide="printer" class="w-4 h-4 text-slate-500"></i>
             <span>Cetak Soal (PDF)</span>
           </button>
           <button 
-            onclick="switchTab('asesmen')"
-            class="inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-md shadow-emerald-600/20 transition-all">
+            id="header-exam-btn"
+            class="student-action-button inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow-md shadow-emerald-600/20 transition-all">
             <i data-lucide="award" class="w-4 h-4"></i>
             <span>Mulai Ujian</span>
           </button>
@@ -100,30 +100,30 @@
       </div>
 
       <!-- Navigation Tabs Bar -->
-      <div class="flex space-x-1 sm:space-x-2 overflow-x-auto py-2 border-t border-slate-100 no-scrollbar" id="tab-buttons">
-        <button data-tab-target="materi" class="trend-tab px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-emerald-700 bg-emerald-50 border border-emerald-600 shadow-sm font-semibold">
+      <div role="tablist" aria-label="Bagian belajar dan latihan" class="flex space-x-1 sm:space-x-2 overflow-x-auto py-2 border-t border-slate-100 no-scrollbar" id="tab-buttons">
+        <button id="nav-materi" type="button" role="tab" aria-selected="true" aria-controls="tab-materi" tabindex="0" data-tab-target="materi" class="trend-tab px-4 py-2 text-sm rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-emerald-700 bg-emerald-50 border border-emerald-600 shadow-sm font-semibold">
           <i data-lucide="book-marked" class="w-4 h-4"></i>
-          <span>1. Materi & Kosakata</span>
+          <span>Belajar: Kosakata</span>
         </button>
-        <button data-tab-target="cerita" class="trend-tab px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
+        <button id="nav-cerita" type="button" role="tab" aria-selected="false" aria-controls="tab-cerita" tabindex="-1" data-tab-target="cerita" class="trend-tab px-4 py-2 text-sm rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
           <i data-lucide="file-text" class="w-4 h-4"></i>
-          <span>2. Teks Cerita (فِي فَصْلِيْ)</span>
+          <span>Belajar: Cerita</span>
         </button>
-        <button data-tab-target="kitabah" class="trend-tab px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
+        <button id="nav-kitabah" type="button" role="tab" aria-selected="false" aria-controls="tab-kitabah" tabindex="-1" data-tab-target="kitabah" class="trend-tab px-4 py-2 text-sm rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
           <i data-lucide="pen-tool" class="w-4 h-4"></i>
-          <span>3. Maharatul Kitabah (Papan Tulis)</span>
+          <span>Latihan: Menulis</span>
         </button>
-        <button data-tab-target="kuis" class="trend-tab px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
+        <button id="nav-kuis" type="button" role="tab" aria-selected="false" aria-controls="tab-kuis" tabindex="-1" data-tab-target="kuis" class="trend-tab px-4 py-2 text-sm rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
           <i data-lucide="help-circle" class="w-4 h-4"></i>
-          <span>4. Bank Soal Interaktif (37 Soal)</span>
+          <span>Latihan: Bank Soal</span>
         </button>
-        <button data-tab-target="asesmen" class="trend-tab px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
+        <button id="nav-asesmen" type="button" role="tab" aria-selected="false" aria-controls="tab-asesmen" tabindex="-1" data-tab-target="asesmen" class="trend-tab px-4 py-2 text-sm rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
           <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-          <span>5. Simulasi Asesmen ATS</span>
+          <span>Ujian: Simulasi ATS</span>
         </button>
-        <button data-tab-target="cetak" class="trend-tab px-4 py-2 text-xs rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
+        <button id="nav-cetak" type="button" role="tab" aria-selected="false" aria-controls="tab-cetak" tabindex="-1" data-tab-target="cetak" class="trend-tab px-4 py-2 text-sm rounded-xl transition-all whitespace-nowrap flex items-center gap-2 text-slate-600 bg-white hover:bg-slate-50">
           <i data-lucide="printer" class="w-4 h-4"></i>
-          <span>6. Cetak Lembar Kerja</span>
+          <span>Guru: Cetak Lembar</span>
         </button>
       </div>
     </div>
@@ -135,7 +135,7 @@
     <!-- ======================================================== -->
     <!-- TAB 1: MATERI & KOSAKATA LENGKAP -->
     <!-- ======================================================== -->
-    <section id="tab-materi" class="tab-section">
+    <section id="tab-materi" class="tab-section" role="tabpanel" aria-labelledby="nav-materi" tabindex="0">
       <!-- Banner Pengantar -->
       <div class="hero-mesh bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 text-white p-6 sm:p-8 rounded-3xl shadow-lg mb-8 relative overflow-hidden">
         <div class="relative z-10 max-w-2xl">
@@ -146,28 +146,28 @@
             Materi Kosakata Alat Tulis & Benda di Kelas
           </h2>
           <p class="text-emerald-100 text-sm leading-relaxed mb-4">
-            Pelajari 22 kosakata lengkap dengan tulisan Arab berharakat, cara baca (latin), arti bahasa Indonesia, dan audio pelafalan asli.
+            Pelajari <span id="hero-vocab-copy-count">—</span> kosakata lengkap dengan tulisan Arab berharakat, cara baca (latin), arti bahasa Indonesia, dan audio pelafalan asli.
           </p>
           <div class="hero-stats">
             <div class="hero-stat">
-              <div class="stat-num"><span data-count="22">22</span></div>
+              <div class="stat-num"><span id="hero-vocab-count">—</span></div>
               <div class="stat-label">Kosakata Arab</div>
             </div>
             <div class="hero-stat">
-              <div class="stat-num"><span data-count="37">37</span></div>
+              <div class="stat-num"><span id="hero-question-count">—</span></div>
               <div class="stat-label">Bank Soal Latihan</div>
             </div>
             <div class="hero-stat">
-              <div class="stat-num"><span data-count="15">15</span> <span class="text-sm font-semibold">soal</span></div>
-              <div class="stat-label">Simulasi ATS 30 menit</div>
+              <div class="stat-num"><span id="hero-exam-count">—</span> <span class="text-sm font-semibold">soal</span></div>
+              <div class="stat-label">Simulasi ATS <span id="hero-exam-duration">—</span></div>
             </div>
           </div>
           <div class="flex flex-wrap gap-2 text-xs mt-4">
             <span class="bg-white/25 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5">
-              <span>✏️</span> 7 Alat Tulis & Sekolah
+              <span>✏️</span> <span id="hero-writing-vocab-count">7 Alat Tulis & Sekolah</span>
             </span>
             <span class="bg-white/25 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5">
-              <span>🏫</span> 15 Benda di Dalam Kelas
+              <span>🏫</span> <span id="hero-class-vocab-count">—</span>
             </span>
             <span class="bg-amber-300 text-amber-950 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 shadow-sm">
               <span>🔊</span> Dilengkapi Suara Audio
@@ -181,33 +181,34 @@
         <!-- Search bar -->
         <div class="relative flex-1">
           <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+          <label for="vocab-search" class="sr-only">Cari kosakata Arab, latin, atau arti dalam bahasa Indonesia</label>
           <input 
             type="text" 
             id="vocab-search" 
             placeholder="Cari kosakata Arab, latin, atau arti..." 
-            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all">
+            class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all">
         </div>
 
         <!-- Filter Kategori Buttons -->
-        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
-          <button data-vocab-filter="all" class="px-3 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow transition-all">
-            Semua (22)
+        <div role="group" aria-label="Filter kategori kosakata" class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+          <button type="button" data-vocab-filter="all" aria-pressed="true" class="student-action-button px-3 py-2 rounded-xl text-sm font-bold bg-emerald-600 text-white shadow transition-all">
+            Semua (<span id="vocab-count-all">—</span>)
           </button>
-          <button data-vocab-filter="alat_tulis" class="px-3 py-2 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all whitespace-nowrap">
-            ✏️ Alat Tulis (7)
+          <button type="button" data-vocab-filter="alat_tulis" aria-pressed="false" class="student-action-button px-3 py-2 rounded-xl text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all whitespace-nowrap">
+            ✏️ Alat Tulis (<span id="vocab-count-writing">—</span>)
           </button>
-          <button data-vocab-filter="benda_kelas" class="px-3 py-2 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all whitespace-nowrap">
-            🏫 Benda Kelas (15)
+          <button type="button" data-vocab-filter="benda_kelas" aria-pressed="false" class="student-action-button px-3 py-2 rounded-xl text-sm font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all whitespace-nowrap">
+            🏫 Benda Kelas (<span id="vocab-count-classroom">—</span>)
           </button>
         </div>
 
         <!-- Mode Tampilan Switcher -->
         <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl shrink-0">
-          <button id="btn-mode-grid" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-600 text-white shadow-xs transition-all flex items-center gap-1.5">
+          <button id="btn-mode-grid" type="button" aria-pressed="true" class="student-action-button px-3 py-1.5 rounded-lg text-sm font-bold bg-emerald-600 text-white shadow-xs transition-all flex items-center gap-1.5">
             <i data-lucide="grid" class="w-3.5 h-3.5"></i>
             <span>Daftar</span>
           </button>
-          <button id="btn-mode-flashcard" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:text-slate-900 transition-all flex items-center gap-1.5">
+          <button id="btn-mode-flashcard" type="button" aria-pressed="false" class="student-action-button px-3 py-1.5 rounded-lg text-sm font-bold bg-slate-100 text-slate-700 hover:text-slate-900 transition-all flex items-center gap-1.5">
             <i data-lucide="layers" class="w-3.5 h-3.5"></i>
             <span>Flashcard</span>
           </button>
@@ -227,10 +228,10 @@
         <div class="mb-4">
           <div class="flex items-center justify-between text-xs text-slate-500 font-bold mb-1">
             <span>Kartu Belajar</span>
-            <span id="fc-counter">1 / 22</span>
+            <span id="fc-counter">— / —</span>
           </div>
           <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-            <div id="fc-progress-bar" class="bg-emerald-600 h-full transition-all duration-300" style="width: 5%"></div>
+            <div id="fc-progress-bar" class="bg-emerald-600 h-full transition-all duration-300" style="width: 0%"></div>
           </div>
         </div>
 
@@ -243,7 +244,7 @@
                 <span id="fc-front-category" class="px-3 py-1 bg-emerald-50 text-emerald-800 text-xs font-bold rounded-full border border-emerald-200">
                   Alat Tulis
                 </span>
-                <button id="fc-sound-btn" class="p-2.5 rounded-full bg-emerald-100 hover:bg-emerald-200 text-emerald-800 transition-colors" title="Dengarkan Suara">
+                <button id="fc-sound-btn" type="button" aria-label="Dengarkan kosakata ini" class="student-action-button p-2.5 rounded-full bg-emerald-100 hover:bg-emerald-200 text-emerald-800 transition-colors" title="Dengarkan Suara">
                   <i data-lucide="volume-2" class="w-5 h-5"></i>
                 </button>
               </div>
@@ -298,15 +299,15 @@
 
         <!-- Flashcard Navigation Buttons -->
         <div class="flex items-center justify-center gap-4 mt-6">
-          <button id="fc-prev-btn" class="px-5 py-3 rounded-2xl bg-white border border-slate-200 shadow-sm text-slate-700 hover:bg-slate-50 font-bold text-xs flex items-center gap-2 transition-all">
+          <button id="fc-prev-btn" type="button" class="student-action-button px-5 py-3 rounded-2xl bg-white border border-slate-200 shadow-sm text-slate-700 hover:bg-slate-50 font-bold text-sm flex items-center gap-2 transition-all">
             <i data-lucide="arrow-left" class="w-4 h-4"></i>
             <span>Sebelumnya</span>
           </button>
-          <button id="fc-flip-btn" class="px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md text-xs font-bold flex items-center gap-2 transition-all">
+          <button id="fc-flip-btn" type="button" class="student-action-button px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-md text-sm font-bold flex items-center gap-2 transition-all">
             <i data-lucide="repeat" class="w-4 h-4"></i>
             <span>Balik Kartu</span>
           </button>
-          <button id="fc-next-btn" class="px-5 py-3 rounded-2xl bg-white border border-slate-200 shadow-sm text-slate-700 hover:bg-slate-50 font-bold text-xs flex items-center gap-2 transition-all">
+          <button id="fc-next-btn" type="button" class="student-action-button px-5 py-3 rounded-2xl bg-white border border-slate-200 shadow-sm text-slate-700 hover:bg-slate-50 font-bold text-sm flex items-center gap-2 transition-all">
             <span>Selanjutnya</span>
             <i data-lucide="arrow-right" class="w-4 h-4"></i>
           </button>
@@ -317,7 +318,7 @@
     <!-- ======================================================== -->
     <!-- TAB 2: TEKS BACAAN CERITA INTERAKTIF ("فِي فَصْلِيْ") -->
     <!-- ======================================================== -->
-    <section id="tab-cerita" class="tab-section hidden">
+    <section id="tab-cerita" class="tab-section hidden" role="tabpanel" aria-labelledby="nav-cerita" tabindex="0" aria-hidden="true">
       <div id="story-interactive-container">
         <!-- Di-render dinamis oleh app.js -->
       </div>
@@ -326,7 +327,7 @@
     <!-- ======================================================== -->
     <!-- TAB 3: MAHARATUL KITABAH (PAPAN TULIS & PUZZLE SAMBUNG) -->
     <!-- ======================================================== -->
-    <section id="tab-kitabah" class="tab-section hidden">
+    <section id="tab-kitabah" class="tab-section hidden" role="tabpanel" aria-labelledby="nav-kitabah" tabindex="0" aria-hidden="true">
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         <!-- Kolom Kiri & Tengah: Papan Tulis Canvas Tracing -->
@@ -341,54 +342,58 @@
               </div>
 
               <!-- Pilihan Kosakata untuk Ditiru (Tracing) -->
-              <div class="flex items-center gap-2">
-                <label class="text-xs text-slate-500 font-semibold">Tiru Kata:</label>
-                <select id="tracing-word-select" class="px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+              <div class="flex flex-wrap items-center gap-2 max-w-full">
+                <label for="tracing-word-select" class="text-sm text-slate-600 font-semibold">Tiru Kata:</label>
+                <select id="tracing-word-select" class="max-w-full px-3 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500">
                   <!-- Populated by JS -->
                 </select>
               </div>
             </div>
 
             <!-- Canvas Drawing Area -->
-            <div class="w-full rounded-2xl overflow-hidden border-2 border-slate-200 shadow-inner canvas-grid relative">
-              <canvas id="kitabah-canvas" class="w-full block touch-none cursor-crosshair"></canvas>
+            <div class="w-full rounded-2xl overflow-hidden border-2 border-slate-200 shadow-inner canvas-grid canvas-stage relative">
+              <canvas id="kitabah-background" class="canvas-layer canvas-background" aria-hidden="true"></canvas>
+              <canvas id="kitabah-canvas" class="canvas-layer canvas-ink" role="img" aria-label="Papan tulis interaktif. Gunakan mouse, sentuhan, atau stylus untuk menulis Arab. Tinta dan bayangan dapat diatur dengan tombol di bawah." aria-describedby="canvas-instructions"></canvas>
             </div>
 
             <!-- Drawing Controls Bottom Bar -->
             <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs">
               <!-- Colors -->
-              <div class="flex items-center gap-1.5">
+              <div class="flex flex-wrap max-w-full items-center gap-1.5">
                 <span class="text-slate-400 font-medium mr-1">Tinta:</span>
-                <button data-draw-color="#1e293b" class="w-7 h-7 rounded-full bg-slate-800 ring-4 ring-emerald-300 transition-all" title="Hitam"></button>
-                <button data-draw-color="#059669" class="w-7 h-7 rounded-full bg-emerald-600 transition-all" title="Hijau"></button>
-                <button data-draw-color="#2563eb" class="w-7 h-7 rounded-full bg-blue-600 transition-all" title="Biru"></button>
-                <button data-draw-color="#dc2626" class="w-7 h-7 rounded-full bg-red-600 transition-all" title="Merah"></button>
+                <button type="button" data-draw-color="#1e293b" class="ink-color-button w-11 h-11 rounded-full bg-slate-800 ring-4 ring-emerald-300 transition-all" title="Hitam" aria-label="Pilih tinta hitam" aria-pressed="true"></button>
+                <button type="button" data-draw-color="#059669" class="ink-color-button w-11 h-11 rounded-full bg-emerald-600 transition-all" title="Hijau" aria-label="Pilih tinta hijau" aria-pressed="false"></button>
+                <button type="button" data-draw-color="#2563eb" class="ink-color-button w-11 h-11 rounded-full bg-blue-600 transition-all" title="Biru" aria-label="Pilih tinta biru" aria-pressed="false"></button>
+                <button type="button" data-draw-color="#dc2626" class="ink-color-button w-11 h-11 rounded-full bg-red-600 transition-all" title="Merah" aria-label="Pilih tinta merah" aria-pressed="false"></button>
               </div>
 
               <!-- Stroke Thickness -->
               <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
-                <span class="text-slate-400 text-[10px] px-1 font-semibold">Tebal:</span>
-                <button data-draw-size="4" class="px-2 py-1 rounded-lg font-bold text-slate-700">Tipis</button>
-                <button data-draw-size="7" class="px-2 py-1 rounded-lg font-bold bg-emerald-600 text-white">Sedang</button>
-                <button data-draw-size="12" class="px-2 py-1 rounded-lg font-bold text-slate-700">Tebal</button>
+                <span class="text-slate-500 text-xs px-1 font-semibold">Tebal:</span>
+                <button type="button" data-draw-size="4" class="canvas-control px-3 py-2 rounded-lg font-bold text-slate-700" aria-pressed="false">Tipis</button>
+                <button type="button" data-draw-size="7" class="canvas-control px-3 py-2 rounded-lg font-bold bg-emerald-600 text-white" aria-pressed="true">Sedang</button>
+                <button type="button" data-draw-size="12" class="canvas-control px-3 py-2 rounded-lg font-bold text-slate-700" aria-pressed="false">Tebal</button>
               </div>
 
               <!-- Actions (Undo, Eraser, Clear, Save) -->
-              <div class="flex items-center gap-1.5">
-                <button id="canvas-undo-btn" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all" title="Urungkan (Undo)">
+              <div class="flex flex-wrap max-w-full items-center gap-1.5">
+                <button type="button" id="canvas-undo-btn" class="canvas-control bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all" title="Urungkan (Undo)" aria-label="Urungkan goresan terakhir">
                   <i data-lucide="undo-2" class="w-4 h-4"></i>
                 </button>
-                <button id="canvas-eraser-btn" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all" title="Mode Penghapus">
+                <button type="button" id="canvas-eraser-btn" class="canvas-control bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all" title="Mode Penghapus" aria-label="Aktifkan atau matikan penghapus" aria-pressed="false">
                   <i data-lucide="eraser" class="w-4 h-4"></i>
                 </button>
-                <button id="canvas-guide-btn" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all" title="On/Off Bayangan Tulisan">
+                <button type="button" id="canvas-guide-btn" class="canvas-control bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all" title="Tampilkan atau sembunyikan garis panduan" aria-label="Tampilkan atau sembunyikan garis panduan" aria-pressed="true">
                   <i data-lucide="eye" class="w-4 h-4"></i>
                 </button>
-                <button id="canvas-clear-btn" class="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-700 font-bold rounded-xl transition-all flex items-center gap-1">
+                <button type="button" id="canvas-tracing-btn" class="canvas-control bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all" title="Tampilkan atau sembunyikan contoh kata" aria-label="Tampilkan atau sembunyikan contoh kata" aria-pressed="true">
+                  <i data-lucide="type" class="w-4 h-4"></i>
+                </button>
+                <button type="button" id="canvas-clear-btn" class="canvas-control px-3 bg-red-50 hover:bg-red-100 text-red-700 font-bold rounded-xl transition-all flex items-center gap-1">
                   <i data-lucide="trash-2" class="w-4 h-4"></i>
                   <span>Bersihkan</span>
                 </button>
-                <button id="canvas-download-btn" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all flex items-center gap-1">
+                <button type="button" id="canvas-download-btn" class="canvas-control px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-all flex items-center gap-1">
                   <i data-lucide="download" class="w-4 h-4"></i>
                   <span>Simpan Hasil</span>
                 </button>
@@ -396,7 +401,7 @@
             </div>
 
             <!-- Petunjuk Menulis Arab untuk Siswa Kelas 3 -->
-            <div class="mt-4 p-3.5 bg-emerald-50 rounded-2xl border border-emerald-200 text-xs text-emerald-900 flex items-start gap-2.5">
+            <div id="canvas-instructions" class="mt-4 p-3.5 bg-emerald-50 rounded-2xl border border-emerald-200 text-sm text-emerald-900 flex items-start gap-2.5">
               <span class="text-base">✍️</span>
               <div>
                 <strong>Kaidah Menulis Huruf Arab:</strong>
@@ -428,10 +433,10 @@
             </div>
 
             <div class="flex items-center justify-between gap-2 mt-6 pt-4 border-t border-slate-100">
-              <button id="puzzle-prev-btn" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-all">
+              <button id="puzzle-prev-btn" type="button" class="student-action-button px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold rounded-xl transition-all">
                 ← Soal Sebelumnya
               </button>
-              <button id="puzzle-next-btn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all">
+              <button id="puzzle-next-btn" type="button" class="student-action-button px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl transition-all">
                 Soal Berikutnya →
               </button>
             </div>
@@ -441,42 +446,32 @@
     </section>
 
     <!-- ======================================================== -->
-    <!-- TAB 4: BANK SOAL INTERAKTIF (37 SOAL LENGKAP) -->
+    <!-- TAB 4: BANK SOAL INTERAKTIF -->
     <!-- ======================================================== -->
-    <section id="tab-kuis" class="tab-section hidden">
+    <section id="tab-kuis" class="tab-section hidden" role="tabpanel" aria-labelledby="nav-kuis" tabindex="0" aria-hidden="true">
       <!-- Header Kuis & Filter -->
       <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 class="text-xl font-extrabold text-slate-800">Bank Soal & Latihan Interaktif</h2>
-          <p class="text-xs text-slate-500 mt-1">Latihan soal dengan koreksi otomatis, kunci jawaban, dan pembahasan langsung.</p>
+          <p class="text-sm text-slate-500 mt-1">Latihan soal dengan koreksi otomatis, kunci jawaban, dan pembahasan langsung.</p>
         </div>
 
-        <div class="flex flex-wrap items-center gap-2">
-          <button data-quiz-filter="all" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow transition-all">
-            Semua Soal
-          </button>
-          <button data-quiz-filter="teks_cerita" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all">
-            📖 Soal Cerita
-          </button>
-          <button data-quiz-filter="sambung_huruf" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all">
-            ✍️ Sambung Huruf
-          </button>
-          <button data-quiz-filter="ikmal_huruf" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all">
-            🔤 Lengkapi Huruf
-          </button>
-          <button data-quiz-filter="pilihan_ganda" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all">
-            🎯 Pilihan Ganda
+        <div class="flex flex-col items-start gap-2">
+          <div id="quiz-filter-buttons" role="group" aria-label="Pilih kategori latihan" class="flex flex-wrap items-center gap-2">
+          </div>
+          <button id="quiz-reset-btn" type="button" disabled class="quiz-reset-control min-h-11 px-3 rounded-xl bg-slate-100 text-slate-500 font-semibold disabled:opacity-60">
+            ↻ Ulangi latihan ini
           </button>
         </div>
       </div>
 
       <!-- Live Score Floating Card -->
-      <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl mb-6 flex items-center justify-between text-xs font-bold text-emerald-900">
+      <div class="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl mb-6 flex flex-wrap items-center justify-between gap-2 text-sm font-bold text-emerald-900">
         <div class="flex items-center gap-2">
           <span>📊 Status Pengerjaan:</span>
-          <span id="quiz-live-score" class="bg-white px-3 py-1 rounded-lg border border-emerald-300 shadow-xs">Benar: 0 / 0</span>
+          <span id="quiz-live-score" class="bg-white px-3 py-1 rounded-lg border border-emerald-300 shadow-xs">Benar: —</span>
         </div>
-        <span id="quiz-total-count" class="text-slate-500 font-medium">37 Butir Soal</span>
+        <span id="quiz-total-count" class="text-slate-500 font-medium">Memuat soal…</span>
       </div>
 
       <!-- Container Daftar Soal -->
@@ -488,7 +483,7 @@
     <!-- ======================================================== -->
     <!-- TAB 5: SIMULASI ASESMEN TENGAH SEMESTER (TIMED EXAM) -->
     <!-- ======================================================== -->
-    <section id="tab-asesmen" class="tab-section hidden">
+    <section id="tab-asesmen" class="tab-section hidden" role="tabpanel" aria-labelledby="nav-asesmen" tabindex="0" aria-hidden="true">
       <!-- Intro Box -->
       <div id="exam-intro-box" class="max-w-2xl mx-auto bg-white p-8 rounded-3xl border border-slate-200 shadow-lg text-center space-y-6">
         <div class="w-20 h-20 bg-emerald-100 text-emerald-700 rounded-3xl flex items-center justify-center text-4xl mx-auto shadow-inner">
@@ -496,24 +491,24 @@
         </div>
         <div>
           <span class="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-extrabold rounded-full uppercase tracking-wider">
-            Simulasi Ujian Resmi
+            Simulasi Latihan
           </span>
           <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 mt-2">
             Asesmen Tengah Semester Ganjil TA 2026/2027
           </h2>
           <p class="text-slate-500 text-sm mt-2 max-w-md mx-auto">
-            Simulasi pengerjaan latihan & asesmen mandiri Bahasa Arab Kelas 3 SD / MI.
+            Latihan mandiri Bahasa Arab Kelas 3. Hasil dikoreksi di peramban dan bukan nilai ujian resmi.
           </p>
         </div>
 
         <div class="grid grid-cols-3 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs">
           <div>
             <div class="text-slate-400">Jumlah Soal</div>
-            <div class="font-extrabold text-slate-800 text-base mt-0.5">15 Butir</div>
+            <div id="exam-config-count" class="font-extrabold text-slate-800 text-base mt-0.5">—</div>
           </div>
           <div class="border-x border-slate-200">
             <div class="text-slate-400">Waktu Ujian</div>
-            <div class="font-extrabold text-slate-800 text-base mt-0.5">30 Menit</div>
+            <div id="exam-config-duration" class="font-extrabold text-slate-800 text-base mt-0.5">—</div>
           </div>
           <div>
             <div class="text-slate-400">Fokus Materi</div>
@@ -523,7 +518,7 @@
 
         <button 
           id="start-exam-btn"
-          class="w-full sm:w-auto px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-emerald-600/25 transition-all">
+          class="student-action-button w-full sm:w-auto px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-emerald-600/25 transition-all">
           🚀 Mulai Kerjakan Asesmen Sekarang
         </button>
       </div>
@@ -531,20 +526,20 @@
       <!-- Active Exam Box (Saat Ujian Berlangsung) -->
       <div id="exam-active-box" class="hidden space-y-6">
         <!-- Floating Exam Header with Timer -->
-        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-md sticky top-24 z-30 flex items-center justify-between">
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-md exam-sticky-header flex items-center justify-between">
           <div>
             <span class="text-xs font-bold text-slate-700">Simulasi ATS Bahasa Arab</span>
-            <div id="exam-progress-text" class="text-xs text-slate-400">Terjawab: 0 / 15</div>
+          <div id="exam-progress-text" class="text-sm text-slate-500">Terjawab: 0</div>
           </div>
 
           <div class="flex items-center gap-4">
             <div class="flex items-center gap-2 bg-red-50 border border-red-200 px-3 py-1.5 rounded-xl text-red-700 font-mono font-bold text-sm">
               <i data-lucide="clock" class="w-4 h-4 text-red-600 animate-pulse"></i>
-              <span id="exam-timer-display">30:00</span>
+              <span id="exam-timer-display" role="timer" aria-live="off">--:--</span>
             </div>
             <button 
               id="submit-exam-btn"
-              class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow transition-all">
+              class="student-action-button px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow transition-all">
               Kumpulkan Ujian
             </button>
           </div>
@@ -556,8 +551,9 @@
 
         <div class="text-center pt-6">
           <button 
-            onclick="document.getElementById('submit-exam-btn').click()"
-            class="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm rounded-2xl shadow-lg transition-all">
+            id="finish-exam-btn"
+            type="button"
+            class="student-action-button px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm rounded-2xl shadow-lg transition-all">
             ✓ Selesai & Kumpulkan Jawaban
           </button>
         </div>
@@ -567,31 +563,34 @@
       <div id="exam-result-box" class="hidden max-w-3xl mx-auto space-y-6">
         <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-lg text-center space-y-4">
           <div class="text-5xl">🏆</div>
-          <h3 class="text-2xl font-extrabold text-slate-800">Hasil Asesmen Tengah Semester</h3>
+          <h3 id="exam-result-heading" tabindex="-1" class="text-2xl font-extrabold text-slate-800">Hasil Simulasi Asesmen</h3>
           
           <!-- Score Circle -->
           <div class="py-4">
             <div class="inline-flex items-baseline justify-center gap-1">
-              <span id="exam-score-number" class="text-6xl font-black text-emerald-600">95</span>
+              <span id="exam-score-number" class="text-6xl font-black text-emerald-600">—</span>
               <span class="text-2xl font-bold text-slate-400">/ 100</span>
             </div>
-            <div id="exam-correct-count" class="text-xs font-bold text-slate-500 mt-1">14 dari 15 Soal Benar</div>
+            <div id="exam-correct-count" class="text-sm font-bold text-slate-500 mt-1">Belum ada hasil ujian</div>
           </div>
 
-          <div id="exam-predikat-badge" class="inline-block px-4 py-1.5 rounded-full text-sm font-bold text-emerald-700 bg-emerald-100">
-            MUMTAZ (Istimewa / Sangat Baik)
+          <div id="exam-predikat-badge" class="inline-block px-4 py-1.5 rounded-full text-sm font-bold text-slate-600 bg-slate-100">
+            Predikat tampil setelah ujian selesai
           </div>
+          <p id="exam-result-message" class="text-sm text-slate-600" aria-live="polite"></p>
 
           <div class="pt-4 flex justify-center gap-3">
             <button 
-              onclick="startExamSimulation()" 
-              class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow transition-all flex items-center gap-2">
+              id="retry-exam-btn"
+            type="button"
+              class="student-action-button px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow transition-all flex items-center gap-2">
               <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
               <span>Ulangi Ujian</span>
             </button>
             <button 
-              onclick="switchTab('cetak')" 
-              class="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+              id="print-exam-btn"
+            type="button"
+              class="student-action-button px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition-all flex items-center gap-2">
               <i data-lucide="printer" class="w-4 h-4"></i>
               <span>Cetak Lembar Asesmen</span>
             </button>
@@ -614,7 +613,7 @@
     <!-- ======================================================== -->
     <!-- TAB 6: CETAK LEMBAR KERJA ASESMEN (PRINT PDF) -->
     <!-- ======================================================== -->
-    <section id="tab-cetak" class="tab-section hidden">
+    <section id="tab-cetak" class="tab-section hidden" role="tabpanel" aria-labelledby="nav-cetak" tabindex="0" aria-hidden="true">
       <!-- Toolbar Cetak -->
       <div class="no-print bg-white p-6 rounded-3xl border border-slate-200 shadow-sm mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -641,8 +640,9 @@
   </main>
 
   <!-- ================= POPUP MODAL ARTI KATA ================= -->
-  <div id="word-detail-modal" class="fixed inset-0 z-50 bg-black/40 backdrop-blur-xs hidden items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-100 text-center space-y-4 animate-in fade-in duration-200">
+  <dialog id="word-detail-modal" class="app-dialog" aria-modal="true" aria-labelledby="word-modal-title">
+    <div class="dialog-content bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 text-center space-y-4">
+      <h2 id="word-modal-title" class="sr-only">Detail kosakata</h2>
       <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl mx-auto">
         📖
       </div>
@@ -659,83 +659,38 @@
       </div>
 
       <div class="flex items-center gap-2 pt-2">
-        <button 
-          onclick="playArabicSpeech(document.getElementById('modal-word-arabic').textContent)"
-          class="flex-1 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs rounded-xl transition-colors flex items-center justify-center gap-1.5">
+        <button type="button" id="word-modal-speech-btn" aria-label="Dengarkan kata ini" class="student-action-button flex-1 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-sm rounded-xl transition-colors flex items-center justify-center gap-1.5">
           <i data-lucide="volume-2" class="w-4 h-4"></i>
           <span>Dengarkan</span>
         </button>
-        <button 
-          onclick="closeWordModal()"
-          class="flex-1 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs rounded-xl transition-colors">
+        <button type="button" id="word-modal-close-btn" data-dialog-initial-focus class="student-action-button flex-1 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm rounded-xl transition-colors">
           Tutup
         </button>
       </div>
     </div>
-  </div>
+  </dialog>
 
-  <!-- ================= MODAL KONFIRMASI KUMPULKAN ASESMEN ================= -->
-  <div id="exam-confirm-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 text-center space-y-4">
-      <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-3xl mx-auto shadow-inner">
-        📝
-      </div>
-      <div>
-        <h4 class="font-bold text-slate-800 text-base">Kumpulkan Asesmen Sekarang?</h4>
-        <p id="exam-confirm-status" class="text-xs text-slate-500 mt-1">
-          Kamu sudah menjawab 0 dari 15 soal.
-        </p>
-      </div>
-      <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-600 text-left space-y-1">
-        <div class="flex items-center justify-between font-semibold">
-          <span>Sisa Waktu Ujian:</span>
-          <span id="exam-confirm-time" class="font-mono text-emerald-700 font-bold">30:00</span>
-        </div>
-        <p class="text-[11px] text-slate-400">Pastikan kamu sudah memeriksa semua jawaban dengan teliti sebelum mengirim.</p>
-      </div>
-      <div class="flex items-center gap-2 pt-2">
-        <button 
-          id="exam-modal-cancel-btn"
-          onclick="closeExamConfirmModal()"
-          class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors">
-          Periksa Lagi
-        </button>
-        <button 
-          id="exam-modal-submit-btn"
-          onclick="confirmSubmitExam()"
-          class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition-colors shadow-md">
-          Ya, Kumpulkan
-        </button>
+  <dialog id="exam-submit-modal" class="app-dialog" aria-modal="true" aria-labelledby="exam-submit-title" aria-describedby="exam-submit-description">
+    <div class="dialog-content bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-4">
+      <h2 id="exam-submit-title" class="text-xl font-extrabold text-slate-800">Kumpulkan jawaban?</h2>
+      <p id="exam-submit-description" class="text-sm text-slate-600">Jawaban yang sudah dipilih akan dinilai. Kamu masih bisa kembali dan memeriksa jawaban sebelum waktu habis.</p>
+      <div class="flex flex-col-reverse sm:flex-row gap-2 pt-2">
+        <button type="button" id="cancel-exam-submit-btn" data-dialog-initial-focus class="student-action-button flex-1 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl">Periksa lagi</button>
+        <button type="button" id="confirm-exam-submit-btn" class="student-action-button flex-1 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl">Kumpulkan</button>
       </div>
     </div>
-  </div>
+  </dialog>
 
-  <!-- ================= MODAL KONFIRMASI RESET DATA ================= -->
-  <div id="reset-confirm-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 text-center space-y-4">
-      <div class="w-14 h-14 rounded-2xl bg-red-100 text-red-700 flex items-center justify-center text-3xl mx-auto">
-        🔄
-      </div>
-      <div>
-        <h4 class="font-bold text-slate-800 text-base">Mulai dari Awal?</h4>
-        <p class="text-xs text-slate-500 mt-1">
-          Semua progres jawaban kuis, skor, dan draft ujian akan dikosongkan dari browser ini.
-        </p>
-      </div>
-      <div class="flex items-center gap-2 pt-2">
-        <button 
-          onclick="closeResetModal()"
-          class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-colors">
-          Batal
-        </button>
-        <button 
-          onclick="confirmResetAllData()"
-          class="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition-colors shadow-md">
-          Ya, Bersihkan
-        </button>
+  <dialog id="reset-data-modal" class="app-dialog" aria-modal="true" aria-labelledby="reset-data-title" aria-describedby="reset-data-description">
+    <div class="dialog-content bg-white rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-4">
+      <h2 id="reset-data-title" class="text-xl font-extrabold text-slate-800">Mulai dari awal?</h2>
+      <p id="reset-data-description" class="text-sm text-slate-600">Pilihan tema, tab, progres latihan, dan ujian yang belum selesai akan dihapus dari browser ini.</p>
+      <div class="flex flex-col-reverse sm:flex-row gap-2 pt-2">
+        <button type="button" id="cancel-reset-data-btn" data-dialog-initial-focus class="student-action-button flex-1 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl">Kembali</button>
+        <button type="button" id="confirm-reset-data-btn" class="student-action-button flex-1 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl">Hapus progres</button>
       </div>
     </div>
-  </div>
+  </dialog>
 
   <!-- ================= MOBILE BOTTOM NAVIGATION BAR ================= -->
   <nav id="mobile-bottom-nav" class="no-print sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 border-t border-slate-200 backdrop-blur-md px-2 py-1 flex items-center justify-around shadow-lg">
@@ -770,14 +725,7 @@
       <p>
         Bahan Pembelajaran & Bank Soal Asesmen - Maharatul Kitabah & Fahmul Maqru'
       </p>
-      <div class="pt-3">
-        <button 
-          onclick="openResetModal()" 
-          class="inline-flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold text-slate-400 hover:text-red-600 border border-slate-200 hover:border-red-300 rounded-xl transition-all">
-          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-          <span>Mulai dari Awal / Bersihkan Data</span>
-        </button>
-      </div>
+      <button type="button" id="reset-data-btn" class="student-action-button mx-auto mt-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl transition-colors">Reset Data / Mulai saka Awal</button>
     </div>
   </footer>
 
